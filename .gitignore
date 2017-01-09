@@ -88,6 +88,7 @@ lib/
 include/
 pyvenv.cfg
 pip-selfcheck.json
+share/
 
 # Spyder project settings
 .spyderproject
