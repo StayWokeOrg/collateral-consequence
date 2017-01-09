@@ -1,3 +1,4 @@
+# run this script to locally download xls files from NICCC 
 import urllib2
 
 states = {'NY': '35',
