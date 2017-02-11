@@ -33,3 +33,9 @@ class Crime(models.Model):
     county = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=255, null=True, blank=True)
     state = models.CharField(max_length=255, null=True, blank=True)
+
+
+class SecondaryOffense(models.Model):
+    """A secondary offense triggered by a crime."""
+
+    pass

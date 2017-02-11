@@ -98,7 +98,7 @@ share/
 
 
 # Scraped xls files
-dev_tools/*.xls
+dev_tools/scraped_files
 
 # No SQLlite
 */db.sqlite3
