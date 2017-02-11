@@ -1,3 +1,4 @@
+"""Models for and related to Crimes."""
 from django.db import models
 
 # Create your models here.
