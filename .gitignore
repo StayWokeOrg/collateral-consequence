@@ -95,3 +95,10 @@ share/
 
 # Rope project settings
 .ropeproject
+
+
+# Scraped xls files
+dev_tools/scraped_files
+
+# No SQLlite
+*/db.sqlite3
