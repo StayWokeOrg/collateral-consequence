@@ -95,3 +95,6 @@ share/
 
 # Rope project settings
 .ropeproject
+
+# No SQLlite
+*/db.sqlite3
