@@ -1,5 +1,6 @@
 """Run this script to locally download xls files from NICCC."""
 from urllib import request
+import os
 
 states = {
     'NY': '35',
@@ -19,13 +20,13 @@ states = {
     'WI': '50',
     'OR': '40',
     'KY': '21',
-    'OH': '38',
+    'OH': '38',  # <-- got a bad gateway
     'OK': '39',
     'FED': '1000',
     'WV': '49',
     'WY': '51',
     'CO': '3',
-    'CA': '10',
+    'CA': '10',  # <-- got a bad gateway
     'GA': '15',
     'RI': '42',
     'CT': '11',
@@ -69,10 +70,13 @@ def main():
     """Run this from the command line."""
     for s in states:
         print("Fetching {}...".format(s))
-        resp = request.urlopen(make_url(s))
         fname = "scraped_files/consq_{}.xls".format(s)
-        with open(fname, 'wb') as out:
-            out.write(resp.read())
+        if fname.split("/")[-1] not in os.listdir("scraped_files"):
+            resp = request.urlopen(make_url(s))
+            with open(fname, 'wb') as out:
+                out.write(resp.read())
+        else:
+            print("{} already obtained. Skipping...".format(s))
 
 if __name__ == "__main__":
     main()

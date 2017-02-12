@@ -11,6 +11,10 @@ class CrimeSerializer(serializers.ModelSerializer):
 
         model = Crime
         fields = (
-            'name', 'crime_type', 'crime_class', 'sex_offense',
-            'county', 'city', 'state'
+            "id", "title", "citation", "state", "consequence_category",
+            "consequence_details", "consequence_type", "duration",
+            'any_felony', 'any_misdemeanor', 'any_offense',
+            'child_support', 'citation', 'controlled_substances', 'corruption',
+            'election_related', 'fraud', 'moral_turpitude', 'motor_vehicle',
+            'recreational_license', 'sex_offense', 'violence', 'weapons'
         )

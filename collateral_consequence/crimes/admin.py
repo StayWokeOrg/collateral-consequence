@@ -9,13 +9,11 @@ class CrimeAdmin(admin.ModelAdmin):
     """Administrator for the crime model."""
 
     list_display = (
-        'name', 'crime_type', 'crime_class', 'sex_offense',
-        'county', 'city', 'state'
+        'title', 'citation', 'duration', 'state'
     )
     empty_value_display = '---'
     list_filter = (
-        'crime_type', 'crime_class', 'sex_offense',
-        'county', 'city', 'state'
+        'duration', 'state', 'consequence_type', 'consequence_category'
     )
 
     class Meta:
