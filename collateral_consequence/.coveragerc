@@ -1,0 +1,13 @@
+[run]
+source=
+    collateral_consequence
+    crimes
+
+omit=
+    */migrations/*.py
+    */tests.py
+    */wsgi.py
+    */apps.py
+
+[report]
+show_missing = True
