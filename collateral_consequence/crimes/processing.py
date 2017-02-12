@@ -1,4 +1,6 @@
 """Scripts for processing data inputs."""
+import os
+import pandas as pd
 
 
 def process_spreadsheet(sheet):
@@ -15,14 +17,31 @@ def process_spreadsheet(sheet):
         sheet = strip_column(sheet, column)
 
     categories = [
-        ("Parsed Offense Category", "Triggering Offense Category"),
-        ("Parsed Additional Offenses", "Additional Triggering Offenses")
+        (
+            "Parsed Offense Category",
+            "Triggering Offense Category",
+            parse_offense_column
+        ),
+        (
+            "Parsed Additional Offenses",
+            "Additional Triggering Offenses",
+            parse_offense_column
+        ),
+        (
+            "Parsed Consequence Category",
+            "Consequence Category",
+            parse_offense_column
+        ),
+        (
+            "Parsed Consequence Type",
+            "Consequence Type",
+            parse_column
+        )
     ]
     for cat in categories:
-        sheet[cat[0]] = sheet[cat[1]].map(lambda x: parse_offense_column(x))
+        sheet[cat[0]] = sheet[cat[1]].map(lambda x: cat[2](x))
 
     sheet = remove_non_offenses(sheet)
-    sheet = sheet.reindex(range(len(sheet)))
     return sheet
 
 
@@ -31,6 +50,16 @@ def parse_offense_column(offense_str):
     if offense_str is not "None":
         output = offense_str.replace("#", "")
         output = output.split(";")
+        output = [string.strip() for string in output]
+    else:
+        output = [None]
+    return output
+
+
+def parse_column(input_str):
+    """Split a string into a list of values."""
+    if input_str is not "None":
+        output = input_str.split("; ")
         output = [string.strip() for string in output]
     else:
         output = [None]
@@ -47,3 +76,33 @@ def remove_non_offenses(data):
     """No need for rows that aren't offenses."""
     column = "Triggering Offense Category"
     return data[data[column].map(lambda x: "N/A" not in x)]
+
+
+cats = []
+consequence_cats = []
+consequence_type = []
+duration_cat = []
+duration_desc = []
+additional_offenses = []
+
+sheets_dir = '/Users/Nick/Documents/staywoke/collateral-consequence/dev_tools/scraped_files'
+sheets = [pd.read_excel(os.path.join(sheets_dir, f)) for f in os.listdir(sheets_dir) if f.endswith(".xls")]
+for sheet in sheets:
+    data_sheet = process_spreadsheet(sheet)
+    for cat in data_sheet["Parsed Offense Category"]:
+        cats.extend(cat)
+    for cat in data_sheet["Parsed Consequence Category"]:
+        consequence_cats.extend(cat)
+    for the_type in data_sheet["Parsed Consequence Type"]:
+        consequence_type.extend(the_type)
+    for offense in data_sheet["Parsed Additional Offenses"]:
+        additional_offenses.extend(offense)
+    for cat in data_sheet["Duration Category"]:
+        duration_cat.append(cat)
+    for desc in data_sheet["Duration Description"]:
+        duration_desc.append(desc)
+
+print("Offense Categories: ", set(cats), end="\n\n")
+print("Consequence Categories: ", set(consequence_cats), end="\n\n")
+print("Consequence Types: ", set(consequence_type), end="\n\n")
+print("Duration Categories: ", set(duration_cat), end="\n\n")
