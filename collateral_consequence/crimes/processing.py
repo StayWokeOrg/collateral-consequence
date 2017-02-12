@@ -11,7 +11,7 @@ def process_spreadsheet(sheet):
         "Duration Description", "Additional Triggering Offenses",
         "Additional Offense Details"
     ]
-    sheet = sheet.copy()[keep_columns]
+    sheet = reduce_columns(sheet, keep_columns)
     sheet.fillna("None", inplace=True)
     for column in keep_columns:
         sheet = strip_column(sheet, column)
@@ -49,6 +49,11 @@ def process_spreadsheet(sheet):
     return sheet
 
 
+def reduce_columns(data, columns):
+    """Keep only those columns that we need for our work."""
+    return data.copy()[columns]
+
+
 def parse_offense_column(offense_str, split_str=";"):
     """Split a string of offenses into a list of items."""
     if offense_str != "None":
@@ -69,7 +74,7 @@ def strip_column(data, column_name):
 def remove_non_offenses(data):
     """No need for rows that aren't offenses."""
     column = "Triggering Offense Category"
-    return data[data[column].map(lambda x: "N/A" not in x)]
+    return data[data[column].map(lambda x: "N/A" not in x and "None" not in x)]
 
 
 if __name__ == "__main__":  # pragma: no cover
