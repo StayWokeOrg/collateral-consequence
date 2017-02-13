@@ -21,10 +21,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^manage/add_state$',
         views.add_state,
-        name="add_state"),
-    url(
-        r'^manage/add_state/(?P<abbr>\w{2})$',
-        views.add_state,
-        name="add_state_data"
-    )
+        name="add_state")
 ]

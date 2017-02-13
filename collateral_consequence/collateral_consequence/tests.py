@@ -14,17 +14,23 @@ class IngestionTests(TestCase):
     def test_add_state_get_is_200(self):
         """."""
         req = self.request_builder.get("/foo")
-        response = add_state(req, abbr="WAT")
+        response = add_state(req)
         self.assertTrue(response.status_code == 200)
 
     def test_add_state_post_bad_abbr_fails(self):
         """."""
-        req = self.request_builder.post("/foo")
-        response = add_state(req, abbr="WAT")
+        req = self.request_builder.post("/foo", {"state": "WAT"})
+        response = add_state(req)
         self.assertTrue("unable" in str(response.content))
 
     def test_add_state_post_good_abbr_succeeds(self):
         """."""
-        req = self.request_builder.post("/foo")
-        response = add_state(req, abbr="NY")
+        req = self.request_builder.post("/foo", {"state": "NY"})
+        response = add_state(req)
         self.assertTrue("success" in str(response.content))
+
+    def test_add_state_post_good_abbr_has_url(self):
+        """."""
+        req = self.request_builder.post("/foo", {"state": "NY"})
+        response = add_state(req)
+        self.assertTrue("https://niccc" in str(response.content))

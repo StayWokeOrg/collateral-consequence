@@ -1,31 +1,35 @@
 """Views for the collateral_consequence app."""
 from django.shortcuts import render
 from crimes.models import Crime
-from .scraper import make_url, STATES
+from collateral_consequence.scraper import make_url, STATES
+from collateral_consequence.forms import StateForm
 
 # Create your views here.
 
 
-def add_state(request, abbr=None):
+def add_state(request):
     """Retrieve and add a state's data to the database."""
     if request.method == "POST":
-        if abbr.upper() not in STATES:
-            # state abbr is bad
+        state = request.POST["state"]
+        if state not in STATES:
+            # provided state is bad
             return render(
                 request,
                 "main/ingest_fail.html",
-                {"location": abbr}
+                {"location": state}
             )
         else:
-            # state abbr is good
+            # provided  state is good
             return render(
                 request,
                 "main/ingest_success.html",
-                {"location": abbr}
+                {
+                    "location": state,
+                    "address": make_url(state)
+                }
             )
-    else:
-        return render(
-            request,
-            "main/ingest_ready.html",
-            {}
-        )
+    return render(
+        request,
+        "main/ingest_ready.html",
+        {"form": StateForm()}
+    )
