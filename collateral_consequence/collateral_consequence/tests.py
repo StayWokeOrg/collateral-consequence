@@ -1,7 +1,13 @@
 """Set of tests for the collateral consequence application."""
 from django.test import TestCase, Client, RequestFactory
 from collateral_consequence.views import add_state
+import mock
+import pandas as pd
+import os
 
+
+path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample_data", "consq_NY.xls")
+SAMPLE_DATA = pd.read_excel(path)
 
 class IngestionTests(TestCase):
     """Test ingestion pipeline."""
@@ -23,13 +29,15 @@ class IngestionTests(TestCase):
         response = add_state(req)
         self.assertTrue("unable" in str(response.content))
 
-    def test_add_state_post_good_abbr_succeeds(self):
+    @mock.patch("collateral_consequence.scraper.get_data", return_value=SAMPLE_DATA)
+    def test_add_state_post_good_abbr_succeeds(self, get_data):
         """."""
         req = self.request_builder.post("/foo", {"state": "NY"})
         response = add_state(req)
         self.assertTrue("success" in str(response.content))
 
-    def test_add_state_post_good_abbr_has_url(self):
+    @mock.patch("collateral_consequence.scraper.get_data", return_value=SAMPLE_DATA)
+    def test_add_state_post_good_abbr_has_url(self, get_data):
         """."""
         req = self.request_builder.post("/foo", {"state": "NY"})
         response = add_state(req)

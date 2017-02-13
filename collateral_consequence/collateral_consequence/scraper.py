@@ -1,6 +1,7 @@
 """Run this script to locally download xls files from NICCC."""
 from urllib import request
-import os
+import pandas as pd
+import sys
 
 STATES = {
     'NY': '35',
@@ -66,17 +67,17 @@ def make_url(state_abrv):
     return base_url.format(STATES[state_abrv], STATES[state_abrv])
 
 
-def main():
+def get_data(url):
+    """Take a URL and find data associated with it."""
+    return pd.read_excel(url)
+
+
+def main(s):
     """Run this from the command line."""
-    for s in STATES:
-        print("Fetching {}...".format(s))
-        fname = "scraped_files/consq_{}.xls".format(s)
-        if fname.split("/")[-1] not in os.listdir("scraped_files"):
-            resp = request.urlopen(make_url(s))
-            with open(fname, 'wb') as out:
-                out.write(resp.read())
-        else:
-            print("{} already obtained. Skipping...".format(s))
+    print("Fetching {}...".format(s))
+    request.urlopen(make_url(s))
+
 
 if __name__ == "__main__":
-    main()
+    state = sys.argv[1]
+    main(state)
