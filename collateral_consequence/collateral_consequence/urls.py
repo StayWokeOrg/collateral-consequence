@@ -1,4 +1,4 @@
-"""collateral_consequence URL Configuration
+"""Collateral Consequence URL Configuration.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.10/topics/http/urls/
@@ -15,7 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from collateral_consequence import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(
+        r'^manage/add_state/(?P<abbr>\w{2})$',
+        views.add_state,
+        name="add_state"
+    )
 ]

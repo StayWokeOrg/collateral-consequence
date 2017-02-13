@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crimes',
-    'rest_framework'
+    'rest_framework',
+    'collateral_consequence'
 ]
 
 MIDDLEWARE = [
