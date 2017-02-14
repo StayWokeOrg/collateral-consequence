@@ -1,15 +1,15 @@
-"""Serializer for the Crime model."""
+"""Serializer for the Consequence model."""
 from rest_framework import serializers
-from crimes.models import Crime
+from crimes.models import Consequence
 
 
-class CrimeSerializer(serializers.ModelSerializer):
-    """Serializer for the Crime model."""
+class ConsequenceSerializer(serializers.ModelSerializer):
+    """Serializer for the Consequence model."""
 
     class Meta:
         """Model definition and field selection."""
 
-        model = Crime
+        model = Consequence
         fields = (
             "id", "title", "citation", "state", "consequence_cat",
             "consequence_details", "consequence_type", "duration",

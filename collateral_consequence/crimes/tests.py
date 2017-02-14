@@ -1,6 +1,6 @@
 """Set of tests for the crimes app."""
 from crimes.models import (
-    Crime,
+    Consequence,
     STATES,
     DURATIONS,
     CONSEQUENCE_TYPES,
@@ -14,7 +14,7 @@ from crimes.processing import (
     reduce_columns,
     process_spreadsheet
 )
-from crimes.serializers import CrimeSerializer
+from crimes.serializers import ConsequenceSerializer
 
 from django.test import TestCase
 from factory import Factory, Sequence
@@ -29,13 +29,13 @@ import random
 fake = Faker()
 
 
-class CrimeFactory(Factory):
-    """Generate new Crime objects."""
+class ConsequenceFactory(Factory):
+    """Generate new Consequence objects."""
 
     class Meta:
         """Set the model on the factory."""
 
-        model = Crime
+        model = Consequence
 
     title = Sequence(lambda x: fake.text(255))
     citation = Sequence(lambda x: fake.text(255))
@@ -49,31 +49,31 @@ class CrimeFactory(Factory):
     state = Sequence(lambda x: random.choice(STATES[1:])[0])
 
 
-class CrimeTests(TestCase):
-    """Tests of the Crime model."""
+class ConsequenceTests(TestCase):
+    """Tests of the Consequence model."""
 
     def setUp(self):
-        """Create a bunch of crime objects."""
-        self.crimes = [CrimeFactory.create() for i in range(20)]
-        for crime in self.crimes:
-            crime.save()
+        """Create a bunch of consequence objects."""
+        self.consqs = [ConsequenceFactory.create() for i in range(20)]
+        for consqs in self.consqs:
+            consq.save()
 
-    def test_new_crimes_have_proper_attributes(self):
-        """New crimes should have a list of attributes."""
-        crime = self.crimes[0]
+    def test_new_consqs_have_proper_attributes(self):
+        """New consequences should have a list of attributes."""
+        consq = self.consqs[0]
         attrs = [
             "id", "title", "citation", "state", "consequence_cat",
             "consequence_details", "consequence_type", "duration",
             "duration_desc", "offense_cat"
         ]
         for item in attrs:
-            self.assertTrue(hasattr(crime, item))
+            self.assertTrue(hasattr(consq, item))
 
-    def test_crime_str_has_right_content(self):
-        """The string representation of a crime object has proper contents."""
-        crime = self.crimes[0]
-        self.assertTrue(crime.title in str(crime))
-        self.assertTrue(crime.state in str(crime))
+    def test_consq_str_has_right_content(self):
+        """The string repr of a consequence object has proper contents."""
+        consq = self.consqs[0]
+        self.assertTrue(consq.title in str(consq))
+        self.assertTrue(consq.state in str(consq))
 
 
 class ProcessingTests(TestCase):
@@ -155,9 +155,9 @@ class ProcessingTests(TestCase):
 
 
 class SerializerTests(TestCase):
-    """Tests of the Django REST serializer for the Crime model."""
+    """Tests of the Django REST serializer for the Consequence model."""
 
-    def test_crime_serializer_has_states(self):
-        """Of its many attributes, test that the crime serializer has a state field."""
-        serial = CrimeSerializer()
+    def test_consequence_serializer_has_states(self):
+        """Of its many attributes, test that the consq serializer has a state field."""
+        serial = ConsequenceSerializer()
         self.assertTrue("state" in serial.data.keys())

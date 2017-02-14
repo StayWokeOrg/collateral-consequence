@@ -1,12 +1,12 @@
 """Administration configuration for the crimes app."""
 from django.contrib import admin
-from crimes.models import Crime
+from crimes.models import Consequence
 
 # Register your models here.
 
 
-class CrimeAdmin(admin.ModelAdmin):
-    """Administrator for the crime model."""
+class ConsequenceAdmin(admin.ModelAdmin):
+    """Administrator for the consequence model."""
 
     list_display = (
         'title', 'citation', 'duration', 'state'
@@ -19,6 +19,6 @@ class CrimeAdmin(admin.ModelAdmin):
     class Meta:
         """Declare which model we're working with."""
 
-        model = Crime
+        model = Consequence
 
-admin.site.register(Crime, CrimeAdmin)
+admin.site.register(Consequence, ConsequenceAdmin)

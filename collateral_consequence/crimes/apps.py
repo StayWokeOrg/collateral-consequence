@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class CrimesConfig(AppConfig):
+class ConsequenceConfig(AppConfig):
     name = 'crimes'
