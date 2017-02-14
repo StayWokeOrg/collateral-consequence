@@ -1,5 +1,6 @@
 """Models for and related to Crimes."""
 from django.db import models
+from multiselectfield import MultiSelectField
 
 # Create your models here.
 
@@ -60,12 +61,59 @@ STATES = [
     ('WI', 'Wisconsin'),
     ('WY', 'Wyoming')
 ]
+
 DURATIONS = [
     ('---', 'Choose a Consequence Duration'),
     ('none', 'None'),
     ('bkg', 'Background Check/General Relief'),
     ('perm', 'Permanent/Unspecified'),
     ('spec', 'Specific Term'),
+    ("cond", "Conditional")
+]
+
+CONSEQUENCE_TYPES = [
+    ('---', 'Choose some consequence types'),
+    ('bkg', 'Background Check'),
+    ('disc', 'Discretionary'),
+    ('waiv', 'Discretionary (waiver)'),
+    ('auto', 'Mandatory/Automatic')
+]
+
+OFFENSE_CATEGORIES = [
+    ('---', 'Choose a Category'),
+    ('corruption', 'Public corruption offenses'),
+    ('misdem', 'Any misdemeanor'),
+    ('moral', 'Crime of moral turpitude'),
+    ('child_supp', 'Child Support offenses'),
+    ('driving', 'Motor vehicle offenses'),
+    ('drugs', 'Controlled substances offenses'),
+    ('sex', 'Sex offenses'),
+    ('violence', 'Crimes of violence, including "person offenses"'),
+    ('rec_license', 'Recreational license offenses'),
+    ('fraud', 'Crimes involving fraud, dishonesty, misrepresentation or money-laundering'),
+    ('any', 'Any offense (including felony, misdemeanor, and lesser offense)'),
+    ('felony', 'Any felony'),
+    ('weapons', 'Weapons offenses'),
+    ('misc', 'Other')
+]
+
+CONSEQUENCE_CATEGORIES = [
+    ('---', 'Choose a Category'),
+    ('edu', 'Education'),
+    ('family', 'Family/domestic rights'),
+    ('govnt_bens', 'Government benefits'),
+    ('govnt_contract', 'Government contracting and program participation'),
+    ('govnt_loans', 'Government loans and grants'),
+    ('housing', 'Housing'),
+    ('jobs', 'Employment'),
+    ('judicial', 'Judicial Rights'),
+    ('prof_lic', 'Occupational and professional license and certification'),
+    ('relief', 'General Relief Provision'),
+    ('registration_lims', 'Registration, notification, and residency restrictions'),
+    ('rec_weapons_lic', 'Recreational license, including firearms'),
+    ('business_lic', 'Business license and other property rights'),
+    ('driving_lic', 'Motor vehicle licensure'),
+    ('voting', 'Political and civic participation'),
 ]
 
 
@@ -74,28 +122,32 @@ class Crime(models.Model):
 
     title = models.CharField(max_length=255)
     citation = models.CharField(max_length=255)
-    state = models.CharField(max_length=3, default="---", choices=STATES)
-
-    sex_offense = models.BooleanField(default=False)
-    fraud = models.BooleanField(default=False)
-    recreational_license = models.BooleanField(default=False)
-    controlled_substances = models.BooleanField(default=False)
-    any_offense = models.BooleanField(default=False)
-    any_felony = models.BooleanField(default=False)
-    any_misdemeanor = models.BooleanField(default=False)
-    motor_vehicle = models.BooleanField(default=False)
-    moral_turpitude = models.BooleanField(default=False)
-    corruption = models.BooleanField(default=False)
-    election_related = models.BooleanField(default=False)
-    weapons = models.BooleanField(default=False)
-    violence = models.BooleanField(default=False)
-    child_support = models.BooleanField(default=False)
-
-    consequence_category = models.CharField(max_length=255)
     consequence_details = models.TextField()
-    consequence_type = models.CharField(max_length=255)
+
+    duration_desc = models.TextField()
+
+    state = models.CharField(max_length=3, default="---", choices=STATES)
     duration = models.CharField(
         max_length=5, choices=DURATIONS, default="---"
+    )
+
+    offense_cat = MultiSelectField(
+        choices=OFFENSE_CATEGORIES,
+        max_length=15,
+        max_choices=14,
+        default='---'
+    )
+    consequence_cat = MultiSelectField(
+        choices=CONSEQUENCE_CATEGORIES,
+        max_length=20,
+        max_choices=15,
+        default='---'
+    )
+    consequence_type = MultiSelectField(
+        choices=CONSEQUENCE_TYPES,
+        max_length=5,
+        max_choices=4,
+        default='---'
     )
 
     def __str__(self):
