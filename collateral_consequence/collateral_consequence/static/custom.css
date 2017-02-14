@@ -1,0 +1,11 @@
+* {
+    box-sizing: border-box;
+}
+
+.center {
+    text-align: center;
+}
+
+.button.white h2 {
+    color: white;
+}

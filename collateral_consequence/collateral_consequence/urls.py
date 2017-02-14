@@ -18,6 +18,7 @@ from django.contrib import admin
 from collateral_consequence import views
 
 urlpatterns = [
+    url(r'^$', views.home_view, name="home"),
     url(r'^admin/', admin.site.urls),
     url(r'^manage/add_state$', views.add_state, name="add_state"),
     url(r'^search/$', views.crime_search, name="crime_search"),

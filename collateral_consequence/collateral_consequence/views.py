@@ -1,7 +1,7 @@
 """Views for the collateral_consequence app."""
 from collateral_consequence import scraper
 from collateral_consequence.forms import StateForm
-from crimes.models import Consequence, STATES
+from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
 from crimes.processing import process_spreadsheet
 from crimes.serializers import ConsequenceSerializer
 
@@ -102,3 +102,15 @@ def ingest_rows(data, state):
             consequence_type=con_types
         )
         new_consq.save()
+
+
+def home_view(request):
+    """View for the home route. Includes data about criminal offenses."""
+    consqs = Consequence.objects
+    data = {}
+    for item in OFFENSE_CATEGORIES:
+        if item[0] not in ["---", "misc"]:
+            data.setdefault(item[0], {})
+            data[item[0]]["title"] = item[1]
+            data[item[0]]["count"] = consqs.filter(offense_cat__contains=item[1]).count()
+    return render(request, "front-end/home.html", {"data": data})
