@@ -1,5 +1,12 @@
 """Set of tests for the crimes app."""
-from crimes.models import Crime, STATES, DURATIONS
+from crimes.models import (
+    Crime,
+    STATES,
+    DURATIONS,
+    CONSEQUENCE_TYPES,
+    OFFENSE_CATEGORIES,
+    CONSEQUENCE_CATEGORIES
+)
 from crimes.processing import (
     parse_offense_column,
     strip_column,
@@ -32,11 +39,13 @@ class CrimeFactory(Factory):
 
     title = Sequence(lambda x: fake.text(255))
     citation = Sequence(lambda x: fake.text(255))
-    consequence_category = Sequence(lambda x: fake.text(255))
     consequence_details = Sequence(lambda x: fake.text(255))
-    consequence_type = Sequence(lambda x: fake.text(255))
+    consequence_cat = Sequence(lambda x: random.choice(CONSEQUENCE_CATEGORIES[1:])[0])
+    consequence_type = Sequence(lambda x: random.choice(CONSEQUENCE_TYPES[1:])[0])
+    offense_cat = Sequence(lambda x: random.choice(OFFENSE_CATEGORIES[1:])[0])
 
     duration = Sequence(lambda x: random.choice(DURATIONS[1:])[0])
+    duration_desc = Sequence(lambda x: fake.text(255))
     state = Sequence(lambda x: random.choice(STATES[1:])[0])
 
 
@@ -53,8 +62,9 @@ class CrimeTests(TestCase):
         """New crimes should have a list of attributes."""
         crime = self.crimes[0]
         attrs = [
-            "title", "citation", "state", "consequence_category",
-            "consequence_details", "consequence_type", "duration"
+            "id", "title", "citation", "state", "consequence_cat",
+            "consequence_details", "consequence_type", "duration",
+            "duration_desc", "offense_cat"
         ]
         for item in attrs:
             self.assertTrue(hasattr(crime, item))

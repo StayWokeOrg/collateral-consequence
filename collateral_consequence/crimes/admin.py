@@ -13,7 +13,7 @@ class CrimeAdmin(admin.ModelAdmin):
     )
     empty_value_display = '---'
     list_filter = (
-        'duration', 'state', 'consequence_type', 'consequence_category'
+        'duration', 'state', 'consequence_type', 'consequence_cat'
     )
 
     class Meta:

@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crimes',
     'rest_framework',
-    'collateral_consequence'
+    'collateral_consequence',
+    'multiselectfield'
 ]
 
 MIDDLEWARE = [
