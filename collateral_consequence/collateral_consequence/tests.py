@@ -1,10 +1,13 @@
 """Set of tests for the collateral consequence application."""
-from django.test import TestCase, Client, RequestFactory
 from collateral_consequence.views import add_state
-from crimes.models import Crime
+from crimes.models import Crime, STATES
+from django.test import TestCase, Client, RequestFactory
+from django.urls import reverse_lazy
+
+from bs4 import BeautifulSoup as Soup
 import mock
-import pandas as pd
 import os
+import pandas as pd
 
 
 path = os.path.join(
@@ -67,3 +70,44 @@ class IngestionTests(TestCase):
         add_state(req)
         count2 = Crime.objects.filter(state='NY').count()
         self.assertEqual(count1, count2)
+
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=SAMPLE_DATA
+    )
+    def test_add_state_route_get_is_200(self, get_data):
+        """."""
+        response = self.client.get(reverse_lazy("add_state"))
+        self.assertEqual(response.status_code, 200)
+
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=SAMPLE_DATA
+    )
+    def test_add_state_route_get_has_select_list(self, get_data):
+        """."""
+        response = self.client.get(reverse_lazy("add_state"))
+        html = Soup(response.content, "html5lib")
+        self.assertEqual(len(html.find_all("option")), len(STATES) - 1)
+
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=SAMPLE_DATA
+    )
+    def test_add_state_route_post_bad_state_is_fail(self, get_data):
+        """."""
+        response = self.client.post(reverse_lazy("add_state"), {
+            "state": "WAT"
+        })
+        self.assertTemplateUsed(response, "main/ingest_fail.html")
+
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=SAMPLE_DATA
+    )
+    def test_add_state_route_post_bad_state_is_success(self, get_data):
+        """."""
+        response = self.client.post(reverse_lazy("add_state"), {
+            "state": "NY"
+        })
+        self.assertTemplateUsed(response, "main/ingest_success.html")
