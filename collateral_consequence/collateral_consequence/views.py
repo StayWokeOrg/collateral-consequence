@@ -53,28 +53,17 @@ def consequences_by_state(request, state=None):
     """Given a state, retrieve all consequence objects for that state."""
     state_set = [item[0] for item in STATES]
     if request.method == "GET" and state.upper() in state_set:
-        consequences = Consequence.objects.filter(state=state).all()
+        try:
+            offense = request.GET["offense"]
+            consequences = Consequence.objects.filter(offense_cat__contains=offense, state=state).all()
+            if not len(consequences):
+                consequences = Consequence.objects.filter(state=state).all()
+        except KeyError:
+            consequences = Consequence.objects.filter(state=state).all()
         serialized = ConsequenceSerializer(consequences, many=True)
+        print("{} consequences".format(len(consequences)))
         return Response(serialized.data)
     return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-# @api_view(['GET'])
-# def offense_types_by_state(request, state=None):
-#     """Given a state, retrieve narrowed offense types."""
-#     if request.method == 'GET':
-#         consqs = Consequence.objects.filter(state=state).all()
-#     return render(request, "", {})
-
-
-def citations_by_state(request):
-    """Given a state, retrieve all the citations for that state."""
-    return render(request, "", {})
-
-
-def consequence_titles_by_state(request):
-    """Given a state, retrieve all the consequence titles for that state."""
-    return render(request, "", {})
 
 
 def ingest_rows(data, state):
