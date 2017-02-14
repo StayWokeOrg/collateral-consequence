@@ -45,7 +45,25 @@ def add_state(request):
 
 def crime_search(request):
     """Retrieve a crime's consequences based on criteria."""
-    return render(request, "", {})
+    states = []
+    offenses = []
+    for state in STATES:
+        states.append({
+            "title": state[0],
+            "text": state[1],
+        })
+
+    skip_these = ["misc", "---", "felony", "misdem"]
+    for offense in OFFENSE_CATEGORIES:
+        if offense[0] not in skip_these:
+            offenses.append({
+                "title": offense[0],
+                "text": offense[1]
+            })
+    return render(request, "front-end/search.html", {
+        "states": states,
+        "offenses": offenses
+    })
 
 
 @api_view(['GET'])

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+    <div class="large-12 columns panel">
+        <h1 class="center">Get Informed About your Charges</h1>
+        <form>
+            <label for="state-list">In what state are you charged?</label>
+            <select id="state-list" name="state-list" required>
+                {% for estados in states %}
+                <option value="{{ estados.title }}">{{ estados.text }}</option>
+                {% endfor %}
+            </select>
+            <button type="button" class="button" id="state-btn">Go</button>
+        </form>
+    </div>
+    <div class="large-12 columns panel">
+        <p class="center">
+            Is one or more of your charges a felony?
+            <button type="button" class="button" value="True">Yes</button>
+            <button type="button" class="button" value="False">No</button>
+        </p>
+        <p class="center">
+            Is one or more of your charges a misdemeanor?
+            <button type="button" class="button" value="True">Yes</button>
+            <button type="button" class="button" value="False">No</button>
+        </p>
+    </div>
+    <div class="large-12 columns panel">
+        <h4>We can narrow the consequences if we know more about the offenses. Click as many as apply to your charges</h4>
+        {% for item in offenses %}
+        <button type="button" class="button" value="{{ item.title }}">{{ item.text }}</button>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
