@@ -117,7 +117,7 @@ CONSEQUENCE_CATEGORIES = [
 ]
 
 
-class Crime(models.Model):
+class Consequence(models.Model):
     """An individual crime."""
 
     title = models.CharField(max_length=255)
@@ -151,8 +151,8 @@ class Crime(models.Model):
     )
 
     def __str__(self):
-        """Representation of the Crime model."""
-        outstr = "Crime: {title}; Location: {location}"
+        """Representation of the Consequence model."""
+        outstr = "Consequence: {title}; Location: {location}"
         return outstr.format(
             title=self.title,
             location=self.state

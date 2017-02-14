@@ -1,6 +1,6 @@
 """Set of tests for the collateral consequence application."""
 from collateral_consequence.views import add_state
-from crimes.models import Crime, STATES
+from crimes.models import Consequence, STATES
 
 from django.contrib.auth.models import User
 from django.test import TestCase, Client, RequestFactory
@@ -78,9 +78,9 @@ class IngestionTests(TestCase):
         req = self.request_builder.post("/foo", {"state": "NY"})
         req.user = self.user
         add_state(req)
-        count1 = Crime.objects.filter(state='NY').count()
+        count1 = Consequence.objects.filter(state='NY').count()
         add_state(req)
-        count2 = Crime.objects.filter(state='NY').count()
+        count2 = Consequence.objects.filter(state='NY').count()
         self.assertEqual(count1, count2)
 
     @mock.patch(
