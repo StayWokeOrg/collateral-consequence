@@ -22,22 +22,15 @@ def add_state(request):
             return render(
                 request,
                 "main/ingest_success.html",
-                {
-                    "location": state,
-                    "address": scraper.make_url(state)
-                }
+                {"location": state, "address": scraper.make_url(state)}
             )
         except (HTTPError, KeyError):
             return render(
-                request,
-                "main/ingest_fail.html",
-                {"location": state}
+                request, "main/ingest_fail.html", {"location": state}
             )
 
     return render(
-        request,
-        "main/ingest_ready.html",
-        {"form": StateForm()}
+        request, "main/ingest_ready.html", {"form": StateForm()}
     )
 
 

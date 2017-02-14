@@ -1,6 +1,7 @@
 """Set of tests for the collateral consequence application."""
 from django.test import TestCase, Client, RequestFactory
 from collateral_consequence.views import add_state
+from crimes.models import Crime
 import mock
 import pandas as pd
 import os
@@ -54,3 +55,15 @@ class IngestionTests(TestCase):
         response = add_state(req)
         self.assertTrue("https://niccc" in str(response.content))
 
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=SAMPLE_DATA
+    )
+    def test_add_state_twice_doesnt_duplicate(self, get_data):
+        """."""
+        req = self.request_builder.post("/foo", {"state": "NY"})
+        add_state(req)
+        count1 = Crime.objects.filter(state='NY').count()
+        add_state(req)
+        count2 = Crime.objects.filter(state='NY').count()
+        self.assertEqual(count1, count2)
