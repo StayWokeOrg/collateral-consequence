@@ -1,14 +1,18 @@
 """Views for the collateral_consequence app."""
-from django.shortcuts import render
-from crimes.models import Crime
-from crimes.processing import process_spreadsheet
 from collateral_consequence import scraper
 from collateral_consequence.forms import StateForm
+from crimes.models import Crime
+from crimes.processing import process_spreadsheet
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import permission_required
+
 from urllib.error import HTTPError
 
 # Create your views here.
 
 
+@permission_required("crimes.add_crime")
 def add_state(request):
     """Retrieve and add a state's data to the database."""
     if request.method == "POST" and request.POST["state"]:

@@ -1,6 +1,8 @@
 """Set of tests for the collateral consequence application."""
 from collateral_consequence.views import add_state
 from crimes.models import Crime, STATES
+
+from django.contrib.auth.models import User
 from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse_lazy
 
@@ -25,16 +27,23 @@ class IngestionTests(TestCase):
         """Set up for the ingestion tests."""
         self.request_builder = RequestFactory()
         self.client = Client()
+        self.user = User(username="admin")
+        self.user.set_password = "potatoes"
+        self.user.is_superuser = True
+        self.user.save()
+        self.client.force_login(self.user)
 
     def test_add_state_get_is_200(self):
         """."""
         req = self.request_builder.get("/foo")
+        req.user = self.user
         response = add_state(req)
         self.assertTrue(response.status_code == 200)
 
     def test_add_state_post_bad_abbr_fails(self):
         """."""
         req = self.request_builder.post("/foo", {"state": "WAT"})
+        req.user = self.user
         response = add_state(req)
         self.assertTrue("unable" in str(response.content))
 
@@ -45,6 +54,7 @@ class IngestionTests(TestCase):
     def test_add_state_post_good_abbr_succeeds(self, get_data):
         """."""
         req = self.request_builder.post("/foo", {"state": "NY"})
+        req.user = self.user
         response = add_state(req)
         self.assertTrue("success" in str(response.content))
 
@@ -55,6 +65,7 @@ class IngestionTests(TestCase):
     def test_add_state_post_good_abbr_has_url(self, get_data):
         """."""
         req = self.request_builder.post("/foo", {"state": "NY"})
+        req.user = self.user
         response = add_state(req)
         self.assertTrue("https://niccc" in str(response.content))
 
@@ -65,6 +76,7 @@ class IngestionTests(TestCase):
     def test_add_state_twice_doesnt_duplicate(self, get_data):
         """."""
         req = self.request_builder.post("/foo", {"state": "NY"})
+        req.user = self.user
         add_state(req)
         count1 = Crime.objects.filter(state='NY').count()
         add_state(req)
