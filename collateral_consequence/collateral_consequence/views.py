@@ -53,16 +53,24 @@ def consequences_by_state(request, state=None):
     """Given a state, retrieve all consequence objects for that state."""
     state_set = [item[0] for item in STATES]
     if request.method == "GET" and state.upper() in state_set:
-        try:
+
+        consqs = Consequence.objects.filter(state=state)
+        if "offense" in request.GET:
             offense = request.GET["offense"]
-            consequences = Consequence.objects.filter(offense_cat__contains=offense, state=state).all()
-            if not len(consequences):
-                consequences = Consequence.objects.filter(state=state).all()
-        except KeyError:
-            consequences = Consequence.objects.filter(state=state).all()
-        serialized = ConsequenceSerializer(consequences, many=True)
-        print("{} consequences".format(len(consequences)))
+            consqs = consqs.filter(offense_cat__contains=offense)
+
+        if "consequence_type" in request.GET:
+            the_type = request.GET["consequence_type"]
+            consqs = consqs.filter(consequence_type__contains=the_type)
+
+        if "consequence_cat" in request.GET:
+            the_cat = request.GET["consequence_cat"]
+            consqs = consqs.filter(consequence_cat__contains=the_cat)
+
+        consqs = consqs.all()
+        serialized = ConsequenceSerializer(consqs, many=True)
         return Response(serialized.data)
+
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
