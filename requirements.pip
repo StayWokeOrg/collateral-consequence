@@ -3,6 +3,7 @@ beautifulsoup4==4.5.3
 bs4==0.0.1
 coverage==4.3.4
 decorator==4.0.10
+dj-database-url==0.4.2
 Django==1.10.5
 django-extensions==1.7.6
 django-filter==1.0.1
@@ -10,6 +11,7 @@ django-multiselectfield==0.1.5
 djangorestframework==3.5.4
 factory-boy==2.8.1
 Faker==0.7.7
+gunicorn==19.6.0
 html5lib==0.999999999
 httpie==0.9.9
 ipython==5.1.0
