@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+    <div class="large-12 columns panel center">
+        <h1 class="center">Get Informed About your Charges</h1>
+        <form id="state-form">
+            <label for="state-list">In what state are you charged?</label>
+            <select id="state-list" name="state-list" required>
+                {% for estados in states %}
+                <option value="{{ estados.title }}">{{ estados.text }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="button" id="state-btn">Go</button>
+        </form>
+    </div>
+    <div class="large-12 columns panel">
+        <p class="center" id="felony">
+            Is one or more of your charges a felony?
+            <button type="button" class="button info" value="true">Yes</button>
+            <button type="button" class="button info" value="false">No</button>
+        </p>
+        <p class="center" id="misdem">
+            Is one or more of your charges a misdemeanor?
+            <button type="button" class="button info" value="true">Yes</button>
+            <button type="button" class="button info" value="false">No</button>
+        </p>
+    </div>
+    <div class="large-12 columns panel center" id="offenses">
+        <h4>We can narrow the consequences if we know more about the offenses. Click as many as apply to your charges</h4>
+        {% for item in offenses %}
+        <button type="button" class="button" value="{{ item.title }}">{{ item.text }}</button>
+        {% endfor %}
+    </div>
+    <div class="large-12 columns panel center">
+    <button type="button" class="button" id="submit-request">See the Consequences</button>
+    </div>
+</div>
+{% endblock %}

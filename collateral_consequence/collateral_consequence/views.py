@@ -1,12 +1,14 @@
 """Views for the collateral_consequence app."""
 from collateral_consequence import scraper
 from collateral_consequence.forms import StateForm
-from crimes.models import Consequence, STATES
+from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
 from crimes.processing import process_spreadsheet
 from crimes.serializers import ConsequenceSerializer
 
-from django.shortcuts import render
 from django.contrib.auth.decorators import permission_required
+from django.db.models import Q
+from django.db.utils import DataError
+from django.shortcuts import render
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -15,6 +17,27 @@ from rest_framework.response import Response
 from urllib.error import HTTPError
 
 # Create your views here.
+
+
+@permission_required("crimes.add_consequence")
+def add_all_states(request):
+    """Retrieve and add a state's data to the database."""
+    states = ["NY", "WA", "DC", "FED", "VA"]
+
+    for state in states:
+        try:
+            if not Consequence.objects.filter(state=state).count():
+                data = scraper.get_data(scraper.make_url(state))
+                ingest_rows(data, state)
+
+        except HTTPError:
+            print("{} failed".format(state))
+
+    return render(
+        request,
+        "main/ingest_success.html",
+        {"location": state}
+    )
 
 
 @permission_required("crimes.add_consequence")
@@ -45,7 +68,25 @@ def add_state(request):
 
 def crime_search(request):
     """Retrieve a crime's consequences based on criteria."""
-    return render(request, "", {})
+    states = []
+    offenses = []
+    for state in STATES:
+        states.append({
+            "title": state[0],
+            "text": state[1],
+        })
+
+    skip_these = ["misc", "---", "felony", "misdem", "any"]
+    for offense in OFFENSE_CATEGORIES:
+        if offense[0] not in skip_these:
+            offenses.append({
+                "title": offense[0],
+                "text": offense[1]
+            })
+    return render(request, "front-end/search.html", {
+        "states": states,
+        "offenses": offenses
+    })
 
 
 @api_view(['GET'])
@@ -84,11 +125,19 @@ def ingest_rows(data, state):
         'Permanent/Unspecified': "perm",
         'None': 'none'
     }
+
+    all_offenses = []
+    all_consequence_cats = []
+    all_consequence_types = []
     for idx in range(len(processed_data)):
         citation = processed_data.iloc[idx]
         offenses = [item.replace(",", "") for item in citation["Parsed Offense Category"]]
         categories = [item.replace(",", "") for item in citation["Parsed Consequence Category"]]
         con_types = [item.replace(",", "") for item in citation["Parsed Consequence Type"]]
+
+        all_offenses.extend(offenses)
+        all_consequence_cats.extend(categories)
+        all_consequence_types.extend(con_types)
 
         new_consq = Consequence(
             title=citation.Title,
@@ -101,4 +150,60 @@ def ingest_rows(data, state):
             consequence_cat=categories,
             consequence_type=con_types
         )
-        new_consq.save()
+        try:
+            new_consq.save()
+        except DataError:
+            print("Broke at: ", citation.Title)
+            print("Consequence details: ", len(citation["Consequence Details"]))
+            print("Duration: ", len(citation["Duration Category"]))
+            print("Duration Description: ", len(citation["Duration Description"]))
+            print("Offense list: ", len(offenses))
+            print("Consequence categories list: ", len(categories))
+            print("Consequence type list: ", len(con_types), end="\n\n")
+            pass
+
+
+def home_view(request):
+    """View for the home route. Includes data about criminal offenses."""
+    consqs = Consequence.objects
+    data = {}
+    for item in OFFENSE_CATEGORIES:
+        if item[0] not in ["---", "misc"]:
+            data.setdefault(item[0], {})
+            data[item[0]]["title"] = item[1]
+            data[item[0]]["count"] = consqs.filter(offense_cat__contains=item[1]).count()
+    return render(request, "front-end/home.html", {"data": data})
+
+
+def results_view(request, state=None):
+    """Harvest data and get the search results."""
+    context = {}
+    consqs = Consequence.objects.filter(
+        state=state,
+        duration__in=["perm", "spec"]
+    )
+    url_data = dict(request.GET)
+    complex_query = None
+    if "felony" in url_data:
+        complex_query = Q(offense_cat__contains="felony")
+
+    if "misdem" in url_data:
+        qry = Q(offense_cat__contains="misdemeanor")
+        if not complex_query:
+            complex_query = Q(offense_cat__contains="misdemeanor")
+        else:
+            complex_query = complex_query | qry
+
+    for offense in url_data["offense"]:
+        try:
+            qry = Q(offense_cat__contains=dict(OFFENSE_CATEGORIES)[offense])
+            complex_query = complex_query | qry
+        except KeyError:
+            pass
+
+    # import pdb; pdb.set_trace()
+    result = consqs.filter(complex_query)
+    context["mandatory"] = result.filter(consequence_type__contains="Mandatory").exclude(consequence_type__contains="bkg").all()
+    context["possible"] = result.filter(consequence_type__contains="Discretionary").exclude(consequence_type__contains="bkg").all()
+    context["count"] = result.exclude(consequence_type__contains="bkg").count()
+    return render(request, "front-end/results.html", context)

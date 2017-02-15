@@ -79,6 +79,7 @@ CONSEQUENCE_TYPES = [
     ('auto', 'Mandatory/Automatic')
 ]
 
+
 OFFENSE_CATEGORIES = [
     ('---', 'Choose a Category'),
     ('corruption', 'Public corruption offenses'),
@@ -88,14 +89,16 @@ OFFENSE_CATEGORIES = [
     ('driving', 'Motor vehicle offenses'),
     ('drugs', 'Controlled substances offenses'),
     ('sex', 'Sex offenses'),
-    ('violence', 'Crimes of violence, including "person offenses"'),
-    ('rec_license', 'Recreational license offenses'),
-    ('fraud', 'Crimes involving fraud, dishonesty, misrepresentation or money-laundering'),
+    ('violence', 'Crimes of violence including "person offenses"'),
+    ('rec_license', 'Recreational license offense'),
+    ('fraud', 'Crimes involving fraud dishonesty misrepresentation or money-laundering'),
     ('any', 'Any offense (including felony, misdemeanor, and lesser offense)'),
     ('felony', 'Any felony'),
     ('weapons', 'Weapons offenses'),
+    ('election', 'Election-related offenses'),
     ('misc', 'Other')
 ]
+
 
 CONSEQUENCE_CATEGORIES = [
     ('---', 'Choose a Category'),
@@ -120,7 +123,7 @@ CONSEQUENCE_CATEGORIES = [
 class Consequence(models.Model):
     """An individual crime."""
 
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=2048)
     citation = models.CharField(max_length=255)
     consequence_details = models.TextField()
 
@@ -133,19 +136,19 @@ class Consequence(models.Model):
 
     offense_cat = MultiSelectField(
         choices=OFFENSE_CATEGORIES,
-        max_length=15,
+        max_length=255,
         max_choices=14,
         default='---'
     )
     consequence_cat = MultiSelectField(
         choices=CONSEQUENCE_CATEGORIES,
-        max_length=20,
+        max_length=255,
         max_choices=15,
         default='---'
     )
     consequence_type = MultiSelectField(
         choices=CONSEQUENCE_TYPES,
-        max_length=5,
+        max_length=255,
         max_choices=4,
         default='---'
     )
