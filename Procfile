@@ -1,0 +1,1 @@
+web: cd collateral_consequence; gunicorn collateral_consequence.wsgi --log-file -
