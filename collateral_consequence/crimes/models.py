@@ -133,19 +133,19 @@ class Consequence(models.Model):
 
     offense_cat = MultiSelectField(
         choices=OFFENSE_CATEGORIES,
-        max_length=15,
+        max_length=255,
         max_choices=14,
         default='---'
     )
     consequence_cat = MultiSelectField(
         choices=CONSEQUENCE_CATEGORIES,
-        max_length=20,
+        max_length=255,
         max_choices=15,
         default='---'
     )
     consequence_type = MultiSelectField(
         choices=CONSEQUENCE_TYPES,
-        max_length=5,
+        max_length=255,
         max_choices=4,
         default='---'
     )
