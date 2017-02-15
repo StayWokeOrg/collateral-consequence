@@ -137,11 +137,11 @@ def home_view(request):
 
 def results_view(request, state=None):
     """Harvest data and get the search results."""
-    context = {
-        "mandatory": {},
-        "possible": {}
-    }
-    consqs = Consequence.objects.filter(state=state)
+    context = {}
+    consqs = Consequence.objects.filter(
+        state=state,
+        duration__in=["perm", "spec"]
+    )
     url_data = dict(request.GET)
     complex_query = None
     if "felony" in url_data:
@@ -161,6 +161,8 @@ def results_view(request, state=None):
         except KeyError:
             pass
 
-    context["count"] = consqs.filter(complex_query).count()
-
+    result = consqs.filter(complex_query)
+    context["mandatory"] = result.filter(consequence_type__contains="auto").exclude(consequence_type__contains="bkg").all()
+    context["possible"] = result.filter(consequence_type__contains="disc").exclude(consequence_type__contains="bkg").all()
+    context["count"] = result.exclude(consequence_type__contains="bkg").count()
     return render(request, "front-end/results.html", context)

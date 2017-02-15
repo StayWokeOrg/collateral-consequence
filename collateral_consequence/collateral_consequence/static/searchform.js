@@ -43,7 +43,7 @@ $(document).ready(function(){
                 }
             }
             this.query_url = output;
-            console.log(this.query_url);
+            window.location = this.query_url;
         },
     }
 
