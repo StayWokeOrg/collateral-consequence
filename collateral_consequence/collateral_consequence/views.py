@@ -7,7 +7,7 @@ from crimes.serializers import ConsequenceSerializer
 
 from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
-from django.db.utils import 
+from django.db.utils import DataError
 from django.shortcuts import render
 
 from rest_framework import status
