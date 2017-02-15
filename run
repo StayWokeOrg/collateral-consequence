@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+cd collateral_consequence
+python manage.py migrate
+gunicorn collateral_consequence.wsgi --log-file -
