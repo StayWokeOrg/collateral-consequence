@@ -121,11 +121,19 @@ def ingest_rows(data, state):
         'Permanent/Unspecified': "perm",
         'None': 'none'
     }
+
+    all_offenses = []
+    all_consequence_cats = []
+    all_consequence_types = []
     for idx in range(len(processed_data)):
         citation = processed_data.iloc[idx]
         offenses = [item.replace(",", "") for item in citation["Parsed Offense Category"]]
         categories = [item.replace(",", "") for item in citation["Parsed Consequence Category"]]
         con_types = [item.replace(",", "") for item in citation["Parsed Consequence Type"]]
+
+        all_offenses.extend(offenses)
+        all_consequence_cats.extend(categories)
+        all_consequence_types.extend(con_types)
 
         new_consq = Consequence(
             title=citation.Title,
@@ -141,7 +149,13 @@ def ingest_rows(data, state):
         try:
             new_consq.save()
         except DataError:
-            print("Broke at: ", citation)
+            print("Broke at: ", citation.Title)
+            print("Consequence details: ", len(citation["Consequence Details"]))
+            print("Duration: ", len(citation["Duration Category"]))
+            print("Duration Description: ", len(citation["Duration Description"]))
+            print("Offense list: ", len(offenses))
+            print("Consequence categories list: ", len(categories))
+            print("Consequence type list: ", len(con_types), end="\n\n")
             pass
 
 

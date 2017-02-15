@@ -79,23 +79,26 @@ CONSEQUENCE_TYPES = [
     ('auto', 'Mandatory/Automatic')
 ]
 
+
 OFFENSE_CATEGORIES = [
     ('---', 'Choose a Category'),
-    ('corruption', 'Public corruption offense'),
+    ('corruption', 'Public corruption offenses'),
     ('misdem', 'Any misdemeanor'),
     ('moral', 'Crime of moral turpitude'),
-    ('child_supp', 'Child Support offense'),
-    ('driving', 'Motor vehicle offense'),
-    ('drugs', 'Controlled substances offense'),
-    ('sex', 'Sex offense'),
-    ('violence', 'Crime of violence'),
+    ('child_supp', 'Child Support offenses'),
+    ('driving', 'Motor vehicle offenses'),
+    ('drugs', 'Controlled substances offenses'),
+    ('sex', 'Sex offenses'),
+    ('violence', 'Crimes of violence including "person offenses"'),
     ('rec_license', 'Recreational license offense'),
-    ('fraud', 'Crime involving fraud'),
+    ('fraud', 'Crimes involving fraud dishonesty misrepresentation or money-laundering'),
     ('any', 'Any offense (including felony, misdemeanor, and lesser offense)'),
     ('felony', 'Any felony'),
-    ('weapons', 'Weapons offense'),
+    ('weapons', 'Weapons offenses'),
+    ('election', 'Election-related offenses'),
     ('misc', 'Other')
 ]
+
 
 CONSEQUENCE_CATEGORIES = [
     ('---', 'Choose a Category'),
