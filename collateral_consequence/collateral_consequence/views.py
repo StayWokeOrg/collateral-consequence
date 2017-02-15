@@ -19,6 +19,23 @@ from urllib.error import HTTPError
 
 
 @permission_required("crimes.add_consequence")
+def add_all_states(request):
+    """Retrieve and add a state's data to the database."""
+    states = ["NY", "CA", "WA", "DC", "FED", "VA"]
+
+    for state in states:
+        if not Consequence.objects.filter(state=state).count():
+            data = scraper.get_data(scraper.make_url(state))
+            ingest_rows(data, state)
+
+    return render(
+        request,
+        "main/ingest_success.html",
+        {"location": state}
+    )
+
+
+@permission_required("crimes.add_consequence")
 def add_state(request):
     """Retrieve and add a state's data to the database."""
     if request.method == "POST" and request.POST["state"]:
