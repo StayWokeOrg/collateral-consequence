@@ -55,7 +55,7 @@ class ConsequenceTests(TestCase):
     def setUp(self):
         """Create a bunch of consequence objects."""
         self.consqs = [ConsequenceFactory.create() for i in range(20)]
-        for consqs in self.consqs:
+        for consq in self.consqs:
             consq.save()
 
     def test_new_consqs_have_proper_attributes(self):
