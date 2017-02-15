@@ -53,7 +53,7 @@ def crime_search(request):
             "text": state[1],
         })
 
-    skip_these = ["misc", "---", "felony", "misdem"]
+    skip_these = ["misc", "---", "felony", "misdem", "any"]
     for offense in OFFENSE_CATEGORIES:
         if offense[0] not in skip_these:
             offenses.append({
@@ -132,3 +132,8 @@ def home_view(request):
             data[item[0]]["title"] = item[1]
             data[item[0]]["count"] = consqs.filter(offense_cat__contains=item[1]).count()
     return render(request, "front-end/home.html", {"data": data})
+
+
+def results_view(request):
+    """Harvest data and get the search results."""
+    return render(request, "", {})

@@ -12,3 +12,6 @@
 .button.white h2 {
     color: white;
 }
+.button:focus {
+    outline: none;
+}
