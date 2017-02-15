@@ -5,6 +5,7 @@ $(document).ready(function(){
         felony: false,
         misdemeanor: false,
         offenses: [],
+        query_url: null,
         get_state: function(){
             var options = $("option");
             for (var i=0; i < options.length; i++) {
@@ -23,8 +24,27 @@ $(document).ready(function(){
             this.offenses = to_apply;
         },
         build_query: function(){
-            // build the query to be sent via ajax
-        }
+            var output = '/results/',
+                paste = '&';
+
+            output += this.state + "/?";
+            if (this.felony) {
+                output += "felony=True" + paste;
+            }
+            if (this.misdemeanor) {
+                output += "misdem=True" + paste;
+            }
+            if (this.offenses) {
+                for (var i=0; i < this.offenses.length; i++) {
+                    output += "offense=" + this.offenses[i];
+                    if (i < this.offenses.length - 1) {
+                        output += paste;
+                    }
+                }
+            }
+            this.query_url = output;
+            console.log(this.query_url);
+        },
     }
 
     var state_form = $("#state-form");
@@ -62,6 +82,6 @@ $(document).ready(function(){
     var submit = $("#submit-request");
     submit.click(function(){
         search_query.get_offenses();
-        console.log(search_query);
+        search_query.build_query();
     });
 });

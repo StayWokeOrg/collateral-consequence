@@ -19,8 +19,9 @@ from collateral_consequence import views
 
 urlpatterns = [
     url(r'^$', views.home_view, name="home"),
+    url(r'^search/$', views.crime_search, name="crime_search"),
+    url(r'^results/(?P<state>\w+)/$', views.results_view, name="results"),
     url(r'^admin/', admin.site.urls),
     url(r'^manage/add_state$', views.add_state, name="add_state"),
-    url(r'^search/$', views.crime_search, name="crime_search"),
     url(r'^api/consequences/(?P<state>\w+)/$', views.consequences_by_state, name="api_consequences")
 ]

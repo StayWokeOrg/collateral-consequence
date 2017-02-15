@@ -5,8 +5,9 @@ from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
 from crimes.processing import process_spreadsheet
 from crimes.serializers import ConsequenceSerializer
 
-from django.shortcuts import render
 from django.contrib.auth.decorators import permission_required
+from django.db.models import Q
+from django.shortcuts import render
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -134,6 +135,32 @@ def home_view(request):
     return render(request, "front-end/home.html", {"data": data})
 
 
-def results_view(request):
+def results_view(request, state=None):
     """Harvest data and get the search results."""
-    return render(request, "", {})
+    context = {
+        "mandatory": {},
+        "possible": {}
+    }
+    consqs = Consequence.objects.filter(state=state)
+    url_data = dict(request.GET)
+    complex_query = None
+    if "felony" in url_data:
+        complex_query = Q(offense_cat__contains="felony")
+
+    if "misdem" in url_data:
+        qry = Q(offense_cat__contains="misdemeanor")
+        if not complex_query:
+            complex_query = Q(offense_cat__contains="misdemeanor")
+        else:
+            complex_query = complex_query | qry
+
+    for offense in url_data["offense"]:
+        try:
+            qry = Q(offense_cat__contains=dict(OFFENSE_CATEGORIES)[offense])
+            complex_query = complex_query | qry
+        except KeyError:
+            pass
+
+    context["count"] = consqs.filter(complex_query).count()
+
+    return render(request, "front-end/results.html", context)
