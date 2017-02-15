@@ -10,7 +10,6 @@ before_script:
 
 install:
   - pip install -r requirements.txt
-  - pip install coveralls
 
 script:
   - export DB_ENGINE='django.db.backends.postgresql_psycopg2'
@@ -20,6 +19,3 @@ script:
   - cd collateral_consequence
   - python manage.py migrate
   - coverage run manage.py test
-  - cp .coverage ../
-
-after_script: coveralls
