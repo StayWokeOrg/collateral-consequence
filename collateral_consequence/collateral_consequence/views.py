@@ -7,6 +7,7 @@ from crimes.serializers import ConsequenceSerializer
 
 from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
+from django.db.utils import 
 from django.shortcuts import render
 
 from rest_framework import status
@@ -137,7 +138,11 @@ def ingest_rows(data, state):
             consequence_cat=categories,
             consequence_type=con_types
         )
-        new_consq.save()
+        try:
+            new_consq.save()
+        except DataError:
+            print("Broke at: ", citation)
+            pass
 
 
 def home_view(request):
