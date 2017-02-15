@@ -123,7 +123,7 @@ CONSEQUENCE_CATEGORIES = [
 class Consequence(models.Model):
     """An individual crime."""
 
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=2048)
     citation = models.CharField(max_length=255)
     consequence_details = models.TextField()
 

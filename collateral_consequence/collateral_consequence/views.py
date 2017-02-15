@@ -22,12 +22,16 @@ from urllib.error import HTTPError
 @permission_required("crimes.add_consequence")
 def add_all_states(request):
     """Retrieve and add a state's data to the database."""
-    states = ["NY", "CA", "WA", "DC", "FED", "VA"]
+    states = ["NY", "WA", "DC", "FED", "VA"]
 
     for state in states:
-        if not Consequence.objects.filter(state=state).count():
-            data = scraper.get_data(scraper.make_url(state))
-            ingest_rows(data, state)
+        try:
+            if not Consequence.objects.filter(state=state).count():
+                data = scraper.get_data(scraper.make_url(state))
+                ingest_rows(data, state)
+
+        except HTTPError:
+            print("{} failed".format(state))
 
     return render(
         request,
@@ -197,8 +201,9 @@ def results_view(request, state=None):
         except KeyError:
             pass
 
+    # import pdb; pdb.set_trace()
     result = consqs.filter(complex_query)
-    context["mandatory"] = result.filter(consequence_type__contains="auto").exclude(consequence_type__contains="bkg").all()
-    context["possible"] = result.filter(consequence_type__contains="disc").exclude(consequence_type__contains="bkg").all()
+    context["mandatory"] = result.filter(consequence_type__contains="Mandatory").exclude(consequence_type__contains="bkg").all()
+    context["possible"] = result.filter(consequence_type__contains="Discretionary").exclude(consequence_type__contains="bkg").all()
     context["count"] = result.exclude(consequence_type__contains="bkg").count()
     return render(request, "front-end/results.html", context)
