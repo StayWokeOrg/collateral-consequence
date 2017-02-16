@@ -12,7 +12,7 @@ from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
 
 from django.contrib.auth.models import User
 from django.db.models import Q
-from django.test import TestCase, Client, RequestFactory
+from django.test import TransactionTestCase, TestCase, Client, RequestFactory
 from django.urls import reverse_lazy
 
 from bs4 import BeautifulSoup as Soup
@@ -33,7 +33,7 @@ VA_DATA = pd.read_excel(os.path.join(path, "consq_VA.xls"))
 FED_DATA = pd.read_excel(os.path.join(path, "consq_FED.xls"))
 
 
-class IngestionTests(TestCase):
+class IngestionTests(TransactionTestCase):
     """Test ingestion pipeline."""
 
     def setUp(self):
@@ -506,3 +506,22 @@ class HomeViewTests(TestCase):
         """."""
         response = self.client.get(reverse_lazy('home'))
         self.assertTemplateUsed(response, 'front-end/home.html')
+
+
+class ResultsViewTests(TestCase):
+    """Tests of the results view."""
+
+    def setUp(self):
+        """Setup for the results view tests."""
+        self.client = Client()
+        self.request_builder = RequestFactory()
+
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=NY_DATA
+    )
+    def fill_db(self, get_data):
+        """Fill the database with consequences."""
+        ingest_rows("NY")
+
+    def test_results_view_gets_200
