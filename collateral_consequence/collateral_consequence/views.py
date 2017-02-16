@@ -7,6 +7,7 @@ from crimes.serializers import ConsequenceSerializer
 
 from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
+from django.db.transaction import TransactionManagementError
 from django.db.utils import DataError
 from django.shortcuts import render
 
@@ -157,7 +158,7 @@ def ingest_rows(state):
             )
             try:
                 new_consq.save()
-            except DataError:  # pragma: no cover
+            except (DataError, TransactionManagementError):  # pragma: no cover
                 print("Broke at: ", citation.Title)
                 print(
                     "Consequence details: ",
