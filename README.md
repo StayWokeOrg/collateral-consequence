@@ -1,4 +1,5 @@
 # Collateral Consequence
+[![Build Status](https://travis-ci.org/StayWokeOrg/collateral-consequence.svg?branch=clean-and-test)](https://travis-ci.org/StayWokeOrg/collateral-consequence)
 
 The goal of this app is to provide citizens with the information to make fully informed decisions when interacting with the criminal justice system. 
 Individuals are usually not fully informed about collateral consequences at sentencing or as part of a plea colloquy.

@@ -28,6 +28,14 @@ import random
 
 fake = Faker()
 
+path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "collateral_consequence",
+    "sample_data",
+    "consq_NY.xls"
+)
+SAMPLE_DATA = pd.read_excel(path)
+
 
 class ConsequenceFactory(Factory):
     """Generate new Consequence objects."""
@@ -55,7 +63,7 @@ class ConsequenceTests(TestCase):
     def setUp(self):
         """Create a bunch of consequence objects."""
         self.consqs = [ConsequenceFactory.create() for i in range(20)]
-        for consqs in self.consqs:
+        for consq in self.consqs:
             consq.save()
 
     def test_new_consqs_have_proper_attributes(self):
@@ -79,8 +87,7 @@ class ConsequenceTests(TestCase):
 class ProcessingTests(TestCase):
     """Tests of the processing pipeline."""
 
-    sheets_dir = '/Users/Nick/Documents/staywoke/collateral-consequence/dev_tools/scraped_files'
-    sheet = pd.read_excel(os.path.join(sheets_dir, "consq_MI.xls"))
+    sheet = SAMPLE_DATA
 
     def test_offense_column_str_has_removed_char(self):
         """The parse_offense_column function should remove hash symbol."""

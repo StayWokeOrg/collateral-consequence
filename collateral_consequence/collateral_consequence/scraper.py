@@ -72,12 +72,12 @@ def get_data(url):
     return pd.read_excel(url)
 
 
-def main(s):
+def main(s):  # pragma: no cover
     """Run this from the command line."""
     print("Fetching {}...".format(s))
     request.urlopen(make_url(s))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     state = sys.argv[1]
     main(state)

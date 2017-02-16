@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^manage/add_state$', views.add_state, name="add_state"),
     url(r'^manage/add_all_states$', views.add_all_states, name="add_states"),
-    url(r'^api/consequences/(?P<state>\w+)/$', views.consequences_by_state, name="api_consequences")
+    url(r'^api/consequences/(?P<state>\w+)/$', views.consequence_pipeline, name="api_consequences")
 ]
 
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
