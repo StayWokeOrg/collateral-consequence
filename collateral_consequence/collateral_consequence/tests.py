@@ -594,3 +594,51 @@ class ResultsViewTests(TestCase):
             duration__in=["perm", "spec"],
         ).exclude(consequence_type__contains="bkg").count()
         self.assertEqual(response.context["count"], consqs_ct)
+
+    def test_get_results_many_offense_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy(
+            "results", kwargs={"state": "NY"}), {
+            "offense": ["weapons", "violence"]
+        })
+        qry = Q(offense_cat__contains="weapons")
+        qry |= Q(offense_cat__contains="violence")
+        qry |= Q(offense_cat__contains="Any offense")
+        consqs_ct = Consequence.objects.filter(
+            qry,
+            state="NY",
+            duration__in=["perm", "spec"],
+        ).exclude(consequence_type__contains="bkg").count()
+        self.assertEqual(response.context["count"], consqs_ct)
+
+    def test_get_results_bad_offense_ignores(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy(
+            "results", kwargs={"state": "NY"}), {
+            "offense": ["fluffiness"]
+        })
+        qry = Q(offense_cat__contains="Any offense")
+        consqs_ct = Consequence.objects.filter(
+            qry,
+            state="NY",
+            duration__in=["perm", "spec"],
+        ).exclude(consequence_type__contains="bkg").count()
+        self.assertEqual(response.context["count"], consqs_ct)
+
+    def test_get_results_bad_good_offense_ignores_bad(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy(
+            "results", kwargs={"state": "NY"}), {
+            "offense": ["fluffiness", "weapons"]
+        })
+        qry = Q(offense_cat__contains="weapons")
+        qry |= Q(offense_cat__contains="Any offense")
+        consqs_ct = Consequence.objects.filter(
+            qry,
+            state="NY",
+            duration__in=["perm", "spec"],
+        ).exclude(consequence_type__contains="bkg").count()
+        self.assertEqual(response.context["count"], consqs_ct)
