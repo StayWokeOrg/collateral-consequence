@@ -157,7 +157,7 @@ def ingest_rows(state):
             )
             try:
                 new_consq.save()
-            except DataError:
+            except DataError:  # pragma: no cover
                 print("Broke at: ", citation.Title)
                 print(
                     "Consequence details: ",

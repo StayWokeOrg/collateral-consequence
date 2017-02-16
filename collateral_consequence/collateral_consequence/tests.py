@@ -2,12 +2,13 @@
 from collateral_consequence.views import (
     add_state,
     add_all_states,
+    consequence_pipeline,
     crime_search,
+    home_view,
     ingest_rows,
-    consequence_pipeline
 )
 from collateral_consequence.scraper import get_data
-from crimes.models import Consequence, STATES
+from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
 
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -174,23 +175,12 @@ class IngestionTests(TestCase):
 
 
 class SearchTests(TestCase):
-    """Test ingestion pipeline."""
+    """Test search pipeline."""
 
     def setUp(self):
-        """Set up for the ingestion tests."""
+        """Set up for the search tests."""
         self.request_builder = RequestFactory()
         self.client = Client()
-        self.auth_user = self.create_user("admin", True)
-        self.unauth_user = self.create_user("tugboat", False)
-        self.client.force_login(self.auth_user)
-
-    def create_user(self, username=None, superuser=False):
-        """Create a user fixture."""
-        user = User(username=username)
-        user.is_superuser = superuser
-        user.set_password = "potatoes"
-        user.save()
-        return user
 
     @mock.patch(
         "collateral_consequence.scraper.get_data",
@@ -456,3 +446,63 @@ class ScraperTests(TestCase):
         """The get_data function is only supposed to return a data frame."""
         result = get_data(os.path.join(path, "consq_NY.xls"))
         self.assertIsInstance(result, pd.core.frame.DataFrame)
+
+
+class HomeViewTests(TestCase):
+    """Tests for the home view."""
+
+    def setUp(self):
+        """Set up for the home view tests."""
+        self.request_builder = RequestFactory()
+        self.client = Client()
+
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=NY_DATA
+    )
+    def fill_db(self, get_data):
+        """Fill the database with consequences."""
+        ingest_rows("NY")
+
+    def test_home_view_returns_200(self):
+        """."""
+        req = self.request_builder.get("/foo")
+        response = home_view(req)
+        self.assertTrue(response.status_code == 200)
+
+    def test_home_route_returns_200(self):
+        """."""
+        response = self.client.get(reverse_lazy("home"))
+        self.assertTrue(response.status_code == 200)
+
+    def test_home_view_returns_data_dict(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy('home'))
+        self.assertTrue("data" in response.context)
+        self.assertIsInstance(response.context['data'], dict)
+
+    def test_home_view_has_offense_title_and_count_in_dict(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy('home'))
+        violence_data = response.context['data']['violence']
+        violence_ct = Consequence.objects.filter(
+            offense_cat__contains='violence'
+        ).count()
+        violence_title = dict(OFFENSE_CATEGORIES)['violence']
+        self.assertTrue(violence_data['title'] == violence_title)
+        self.assertTrue(violence_data['count'] == violence_ct)
+
+    def test_home_view_not_showing_none_misc(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy('home'))
+        data = response.context['data']
+        self.assertFalse('---' in data)
+        self.assertFalse('misc' in data)
+
+    def test_home_route_uses_proper_template(self):
+        """."""
+        response = self.client.get(reverse_lazy('home'))
+        self.assertTemplateUsed(response, 'front-end/home.html')
