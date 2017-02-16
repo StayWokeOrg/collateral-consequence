@@ -1,7 +1,8 @@
 """Set of tests for the collateral consequence application."""
 from collateral_consequence.views import (
     add_state,
-    add_all_states
+    add_all_states,
+    crime_search
 )
 from collateral_consequence.scraper import get_data
 from crimes.models import Consequence, STATES
@@ -158,6 +159,59 @@ class IngestionTests(TestCase):
         req.user = self.unauth_user
         response = add_all_states(req)
         self.assertTrue(response.status_code == 302)
+
+    def test_crime_search_is_status_200(self):
+        """."""
+        req = self.request_builder.get("/foo-bar")
+        response = crime_search(req)
+        self.assertTrue(response.status_code == 200)
+
+    def test_crime_search_has_states(self):
+        """."""
+        response = self.client.get(reverse_lazy('crime_search'))
+        self.assertTrue("states" in str(response.context))
+
+    def test_crime_search_has_lists_of_dicts_of_states(self):
+        """."""
+        response = self.client.get(reverse_lazy('crime_search'))
+        states = response.context["states"]
+        self.assertIsInstance(states, list)
+        for state in states:
+            self.assertIsInstance(state, dict)
+
+    def test_crime_search_has_abbrev_long_name_pairs_of_states(self):
+        """."""
+        response = self.client.get(reverse_lazy('crime_search'))
+        states = response.context["states"]
+        for state in states:
+            self.assertTrue(len(state["title"]) <= 3)
+            self.assertTrue(len(state["text"]) >= 4)
+
+    def test_crime_search_has_offenses(self):
+        """."""
+        response = self.client.get(reverse_lazy('crime_search'))
+        self.assertTrue("offenses" in str(response.context))
+
+    def test_crime_search_has_lists_of_dicts_of_offenses(self):
+        """."""
+        response = self.client.get(reverse_lazy('crime_search'))
+        offenses = response.context["offenses"]
+        self.assertIsInstance(offenses, list)
+        for offense in offenses:
+            self.assertIsInstance(offense, dict)
+
+    def test_crime_search_has_abbrev_long_name_pairs_of_offenses(self):
+        """."""
+        response = self.client.get(reverse_lazy('crime_search'))
+        offenses = response.context["offenses"]
+        for offense in offenses:
+            self.assertFalse(' ' in offense["title"])
+            self.assertTrue(len(offense["text"]) >= 5)
+
+    def test_crime_search_uses_search_template(self):
+        """."""
+        response = self.client.get(reverse_lazy('crime_search'))
+        self.assertTemplateUsed(response, "front-end/search.html")
 
 
 class ScraperTests(TestCase):

@@ -26,9 +26,7 @@ def add_all_states(request):
 
     for state in states:
         try:
-            if not Consequence.objects.filter(state=state).count():
-                data = scraper.get_data(scraper.make_url(state))
-                ingest_rows(data, state)
+            ingest_rows(state)
 
         except HTTPError:
             print("{} failed".format(state))
@@ -47,9 +45,7 @@ def add_state(request):
         state = request.POST["state"].upper()
 
         try:
-            if not Consequence.objects.filter(state=state).count():
-                data = scraper.get_data(scraper.make_url(state))
-                ingest_rows(data, state)
+            ingest_rows(state)
 
             return render(
                 request,
@@ -71,10 +67,7 @@ def crime_search(request):
     states = []
     offenses = []
     for state in STATES:
-        states.append({
-            "title": state[0],
-            "text": state[1],
-        })
+        states.append({"title": state[0], "text": state[1]})
 
     skip_these = ["misc", "---", "felony", "misdem", "any"]
     for offense in OFFENSE_CATEGORIES:
@@ -115,52 +108,68 @@ def consequences_by_state(request, state=None):
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-def ingest_rows(data, state):
+def ingest_rows(state):
     """Given a dataframe, input new data into the database."""
-    processed_data = process_spreadsheet(data)
-    duration_dict = {
-        'Specific Term': "spec",
-        'N/A (background check, general relief)': "bkg",
-        'Conditional': "cond",
-        'Permanent/Unspecified': "perm",
-        'None': 'none'
-    }
+    if not Consequence.objects.filter(state=state).count():
+        data = scraper.get_data(scraper.make_url(state))
+        processed_data = process_spreadsheet(data)
+        duration_dict = {
+            'Specific Term': "spec",
+            'N/A (background check, general relief)': "bkg",
+            'Conditional': "cond",
+            'Permanent/Unspecified': "perm",
+            'None': 'none'
+        }
 
-    all_offenses = []
-    all_consequence_cats = []
-    all_consequence_types = []
-    for idx in range(len(processed_data)):
-        citation = processed_data.iloc[idx]
-        offenses = [item.replace(",", "") for item in citation["Parsed Offense Category"]]
-        categories = [item.replace(",", "") for item in citation["Parsed Consequence Category"]]
-        con_types = [item.replace(",", "") for item in citation["Parsed Consequence Type"]]
+        all_offenses = []
+        all_consequence_cats = []
+        all_consequence_types = []
+        for idx in range(len(processed_data)):
+            citation = processed_data.iloc[idx]
 
-        all_offenses.extend(offenses)
-        all_consequence_cats.extend(categories)
-        all_consequence_types.extend(con_types)
+            cols = [
+                "Parsed Offense Category",
+                "Parsed Consequence Category",
+                "Parsed Consequence Type"
+            ]
+            offenses = [item.replace(",", "") for item in citation[cols[0]]]
+            categories = [item.replace(",", "") for item in citation[cols[1]]]
+            con_types = [item.replace(",", "") for item in citation[cols[2]]]
 
-        new_consq = Consequence(
-            title=citation.Title,
-            citation=citation.Citation,
-            state=state,
-            consequence_details=citation["Consequence Details"],
-            duration=duration_dict[citation["Duration Category"]],
-            duration_desc=citation["Duration Description"],
-            offense_cat=offenses,
-            consequence_cat=categories,
-            consequence_type=con_types
-        )
-        try:
-            new_consq.save()
-        except DataError:
-            print("Broke at: ", citation.Title)
-            print("Consequence details: ", len(citation["Consequence Details"]))
-            print("Duration: ", len(citation["Duration Category"]))
-            print("Duration Description: ", len(citation["Duration Description"]))
-            print("Offense list: ", len(offenses))
-            print("Consequence categories list: ", len(categories))
-            print("Consequence type list: ", len(con_types), end="\n\n")
-            pass
+            all_offenses.extend(offenses)
+            all_consequence_cats.extend(categories)
+            all_consequence_types.extend(con_types)
+
+            new_consq = Consequence(
+                title=citation.Title,
+                citation=citation.Citation,
+                state=state,
+                consequence_details=citation["Consequence Details"],
+                duration=duration_dict[citation["Duration Category"]],
+                duration_desc=citation["Duration Description"],
+                offense_cat=offenses,
+                consequence_cat=categories,
+                consequence_type=con_types
+            )
+            try:
+                new_consq.save()
+            except DataError:
+                print("Broke at: ", citation.Title)
+                print(
+                    "Consequence details: ",
+                    len(citation["Consequence Details"])
+                )
+                print("Duration: ", len(citation["Duration Category"]))
+                print(
+                    "Duration Description: ",
+                    len(citation["Duration Description"])
+                )
+                print("Offense list: ", len(offenses))
+                print("Consequence categories list: ", len(categories))
+                print(
+                    "Consequence type list: {}\n\n".format(len(con_types))
+                )
+                pass
 
 
 def home_view(request):
@@ -171,7 +180,9 @@ def home_view(request):
         if item[0] not in ["---", "misc"]:
             data.setdefault(item[0], {})
             data[item[0]]["title"] = item[1]
-            data[item[0]]["count"] = consqs.filter(offense_cat__contains=item[1]).count()
+            data[item[0]]["count"] = consqs.filter(
+                offense_cat__contains=item[1]
+            ).count()
     return render(request, "front-end/home.html", {"data": data})
 
 
@@ -203,7 +214,11 @@ def results_view(request, state=None):
 
     # import pdb; pdb.set_trace()
     result = consqs.filter(complex_query)
-    context["mandatory"] = result.filter(consequence_type__contains="Mandatory").exclude(consequence_type__contains="bkg").all()
-    context["possible"] = result.filter(consequence_type__contains="Discretionary").exclude(consequence_type__contains="bkg").all()
+    context["mandatory"] = result.filter(
+        consequence_type__contains="Mandatory"
+    ).exclude(consequence_type__contains="bkg").all()
+    context["possible"] = result.filter(
+        consequence_type__contains="Discretionary"
+    ).exclude(consequence_type__contains="bkg").all()
     context["count"] = result.exclude(consequence_type__contains="bkg").count()
     return render(request, "front-end/results.html", context)
