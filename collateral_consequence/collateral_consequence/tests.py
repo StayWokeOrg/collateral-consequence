@@ -5,7 +5,7 @@ from collateral_consequence.views import (
     consequence_pipeline,
     crime_search,
     home_view,
-    ingest_rows,
+    ingest_rows
 )
 from collateral_consequence.scraper import get_data
 from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
@@ -33,7 +33,8 @@ VA_DATA = pd.read_excel(os.path.join(path, "consq_VA.xls"))
 FED_DATA = pd.read_excel(os.path.join(path, "consq_FED.xls"))
 
 
-class IngestionTests(TransactionTestCase):
+class IngestionTests(TransactionTestCase): # <-- use for Travis only
+# class IngestionTests(TestCase):
     """Test ingestion pipeline."""
 
     def setUp(self):
@@ -524,3 +525,72 @@ class ResultsViewTests(TestCase):
         """Fill the database with consequences."""
         ingest_rows("NY")
 
+    def test_get_results_route_is_200(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy(
+            "results", kwargs={"state": "NY"}), {
+            "felony": True
+        })
+        self.assertTrue(response.status_code == 200)
+
+    def test_get_results_felony_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy(
+            "results", kwargs={"state": "NY"}), {
+            "felony": True
+        })
+        felony_ct = Consequence.objects.filter(
+            state="NY",
+            duration__in=["perm", "spec"],
+            offense_cat__contains="felony"
+        ).exclude(consequence_type__contains="bkg").count()
+        self.assertEqual(response.context["count"], felony_ct)
+
+    def test_get_results_misdemeanor_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy(
+            "results", kwargs={"state": "NY"}), {
+            "misdem": True
+        })
+        misdem_ct = Consequence.objects.filter(
+            state="NY",
+            duration__in=["perm", "spec"],
+            offense_cat__contains="misdemeanor"
+        ).exclude(consequence_type__contains="bkg").count()
+        self.assertEqual(response.context["count"], misdem_ct)
+
+    def test_get_results_misdem_and_felony_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy(
+            "results", kwargs={"state": "NY"}), {
+            "misdem": True, "felony": True
+        })
+        qry = Q(offense_cat__contains="felony")
+        qry |= Q(offense_cat__contains='misdemeanor')
+        qry |= Q(offense_cat__contains="Any offense")
+        consqs_ct = Consequence.objects.filter(
+            qry,
+            state="NY",
+            duration__in=["perm", "spec"],
+        ).exclude(consequence_type__contains="bkg").count()
+        self.assertEqual(response.context["count"], consqs_ct)
+
+    def test_get_results_offense_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        response = self.client.get(reverse_lazy(
+            "results", kwargs={"state": "NY"}), {
+            "offense": ["weapons"]
+        })
+        qry = Q(offense_cat__contains="weapons")
+        qry |= Q(offense_cat__contains="Any offense")
+        consqs_ct = Consequence.objects.filter(
+            qry,
+            state="NY",
+            duration__in=["perm", "spec"],
+        ).exclude(consequence_type__contains="bkg").count()
+        self.assertEqual(response.context["count"], consqs_ct)

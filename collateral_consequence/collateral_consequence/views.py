@@ -108,7 +108,7 @@ def filter_by_offenses(query_manager, offenses):
     complex_query = Q(offense_cat__contains=offenses[0])
     if len(offenses) > 1:
         for offense in offenses[1:]:
-            complex_query |= Q(offense_cat__contains=offenses[1])
+            complex_query |= Q(offense_cat__contains=offense)
 
     return query_manager.filter(complex_query)
 
@@ -199,26 +199,22 @@ def results_view(request, state=None):
         duration__in=["perm", "spec"]
     )
     url_data = dict(request.GET)
-    complex_query = None
+    offense_list = ["Any offense"]
+
     if "felony" in url_data:
-        complex_query = Q(offense_cat__contains="felony")
+        offense_list.append("felony")
 
     if "misdem" in url_data:
-        qry = Q(offense_cat__contains="misdemeanor")
-        if not complex_query:
-            complex_query = Q(offense_cat__contains="misdemeanor")
-        else:
-            complex_query = complex_query | qry
+        offense_list.append("misdemeanor")
 
-    for offense in url_data["offense"]:
-        try:
-            qry = Q(offense_cat__contains=dict(OFFENSE_CATEGORIES)[offense])
-            complex_query = complex_query | qry
-        except KeyError:
-            pass
+    if "offense" in url_data:
+        for offense in url_data["offense"]:
+            try:
+                offense_list.append(dict(OFFENSE_CATEGORIES)[offense])
+            except KeyError:
+                pass
 
-    # import pdb; pdb.set_trace()
-    result = consqs.filter(complex_query)
+    result = filter_by_offenses(consqs, offense_list)
     context["mandatory"] = result.filter(
         consequence_type__contains="Mandatory"
     ).exclude(consequence_type__contains="bkg").all()
