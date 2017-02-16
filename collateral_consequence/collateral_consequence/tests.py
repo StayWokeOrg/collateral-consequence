@@ -4,12 +4,13 @@ from collateral_consequence.views import (
     add_all_states,
     crime_search,
     ingest_rows,
-    consequences_by_state
+    consequence_pipeline
 )
 from collateral_consequence.scraper import get_data
 from crimes.models import Consequence, STATES
 
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse_lazy
 
@@ -171,6 +172,40 @@ class IngestionTests(TestCase):
         response = add_all_states(req)
         self.assertTrue(response.status_code == 302)
 
+
+class SearchTests(TestCase):
+    """Test ingestion pipeline."""
+
+    def setUp(self):
+        """Set up for the ingestion tests."""
+        self.request_builder = RequestFactory()
+        self.client = Client()
+        self.auth_user = self.create_user("admin", True)
+        self.unauth_user = self.create_user("tugboat", False)
+        self.client.force_login(self.auth_user)
+
+    def create_user(self, username=None, superuser=False):
+        """Create a user fixture."""
+        user = User(username=username)
+        user.is_superuser = superuser
+        user.set_password = "potatoes"
+        user.save()
+        return user
+
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=NY_DATA
+    )
+    def fill_db(self, get_data):
+        """Fill the database with consequences."""
+        ingest_rows("NY")
+
+    def parsed_json_response(self, request):
+        """."""
+        response = consequence_pipeline(request, state="ny")
+        parsed_content = json.loads(response.rendered_content.decode('utf8'))
+        return parsed_content
+
     def test_crime_search_is_status_200(self):
         """."""
         req = self.request_builder.get("/foo-bar")
@@ -224,33 +259,32 @@ class IngestionTests(TestCase):
         response = self.client.get(reverse_lazy('crime_search'))
         self.assertTemplateUsed(response, "front-end/search.html")
 
-    def test_get_consequences_by_state_is_200(self):
+    def test_get_consequence_pipeline_is_200(self):
         """."""
         self.fill_db()
         req = self.request_builder.get("/foo")
-        response = consequences_by_state(req, state="NY")
+        response = consequence_pipeline(req, state="NY")
         self.assertTrue(response.status_code == 200)
 
     def test_get_consequences_by_lower_state_is_200(self):
         """."""
         self.fill_db()
         req = self.request_builder.get("/foo")
-        response = consequences_by_state(req, state="ny")
+        response = consequence_pipeline(req, state="ny")
         self.assertTrue(response.status_code == 200)
 
     def test_get_consequences_returns_json(self):
         """."""
         self.fill_db()
         req = self.request_builder.get("/foo")
-        response = consequences_by_state(req, state="ny")
+        response = consequence_pipeline(req, state="ny")
         self.assertTrue(response.accepted_media_type == "application/json")
 
     def test_get_consequences_returns_right_num_consequences(self):
         """."""
         self.fill_db()
         req = self.request_builder.get("/foo")
-        response = consequences_by_state(req, state="ny")
-        parsed_content = json.loads(response.rendered_content.decode('utf8'))
+        parsed_content = self.parsed_json_response(req)
         self.assertTrue(len(parsed_content) == Consequence.objects.count())
 
     def test_get_consequences_consequence_has_all_fields(self):
@@ -262,10 +296,157 @@ class IngestionTests(TestCase):
             "duration_desc", "offense_cat"
         )
         req = self.request_builder.get("/foo")
-        response = consequences_by_state(req, state="ny")
-        parsed_content = json.loads(response.rendered_content.decode('utf8'))
+        parsed_content = self.parsed_json_response(req)
         for field in fields:
             self.assertTrue(field in parsed_content[0])
+
+    def test_post_consequences_is_bad_request(self):
+        """."""
+        req = self.request_builder.post("/foo")
+        response = consequence_pipeline(req, state="ny")
+        self.assertTrue(response.status_code == 405)
+
+    def test_get_consequences_bad_state_is_bad_request(self):
+        """."""
+        req = self.request_builder.get("/foo")
+        response = consequence_pipeline(req, state="china")
+        self.assertTrue(response.status_code == 400)
+
+    def test_get_consequences_with_offense_shows_only_that_offense(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "offense": "felony"
+        })
+        parsed_content = self.parsed_json_response(req)
+        felony_consequences = Consequence.objects.filter(
+            offense_cat__contains="felony"
+        ).count()
+        self.assertTrue(len(parsed_content) == felony_consequences)
+
+    def test_get_consequences_with_bad_offense_returns_none(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "offense": "pickles"
+        })
+        parsed_content = self.parsed_json_response(req)
+        self.assertTrue(len(parsed_content) == 0)
+
+    def test_get_consequences_with_multiple_offenses_returns_all_of_both(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "offense": ["vehicle", "weapons"]
+        })
+        parsed_content = self.parsed_json_response(req)
+        consqs1 = Q(offense_cat__contains="vehicle")
+        consqs2 = Q(offense_cat__contains="weapons")
+        complex_query = consqs1 | consqs2
+        result_count = Consequence.objects.filter(
+            complex_query, state="NY"
+        ).count()
+        self.assertTrue(len(parsed_content) == result_count)
+
+    def test_get_mandatory_consequences_returns_right_count_consequences(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "consequence_type": "auto"
+        })
+        parsed_content = self.parsed_json_response(req)
+        mandatories = Consequence.objects.filter(
+            consequence_type__contains="auto"
+        ).count()
+        self.assertTrue(len(parsed_content) == mandatories)
+
+    def test_get_bad_consequence_type_returns_none(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "consequence_type": "magic"
+        })
+        parsed_content = self.parsed_json_response(req)
+        self.assertTrue(len(parsed_content) == 0)
+
+    def test_get_consequence_type_and_offense_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "offense": "weapons",
+            "consequence_type": "auto"
+        })
+        parsed_content = self.parsed_json_response(req)
+        consqs_ct = Consequence.objects.filter(
+            state="NY",
+            offense_cat__contains="weapons",
+            consequence_type__contains="auto"
+        ).count()
+        self.assertTrue(len(parsed_content) == consqs_ct)
+
+    def test_get_consequence_type_and_many_offenses_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "offense": ["weapons", "vehicle"],
+            "consequence_type": "auto"
+        })
+        parsed_content = self.parsed_json_response(req)
+        consqs1 = Q(offense_cat__contains="vehicle")
+        consqs2 = Q(offense_cat__contains="weapons")
+        complex_query = consqs1 | consqs2
+        consqs_ct = Consequence.objects.filter(
+            complex_query,
+            state="NY",
+            consequence_type__contains="auto"
+        ).count()
+        self.assertTrue(len(parsed_content) == consqs_ct)
+
+    def test_bad_consequence_type_and_many_offenses_returns_none(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "offense": ["weapons", "vehicle"],
+            "consequence_type": "boogy"
+        })
+        parsed_content = self.parsed_json_response(req)
+        self.assertTrue(len(parsed_content) == 0)
+
+    def test_get_consequence_type_one_bad_offense_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "offense": ["weapons", "fluffiness"],
+            "consequence_type": "auto"
+        })
+        parsed_content = self.parsed_json_response(req)
+        consqs_ct = Consequence.objects.filter(
+            offense_cat__contains="weapons",
+            state="NY",
+            consequence_type__contains="auto"
+        ).count()
+        self.assertTrue(len(parsed_content) == consqs_ct)
+
+    def test_get_education_consequences_returns_proper_count(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "consequence_cat": "education"
+        })
+        parsed_content = self.parsed_json_response(req)
+        consqs_ct = Consequence.objects.filter(
+            state="NY", consequence_cat__contains="education"
+        ).count()
+        self.assertTrue(len(parsed_content) == consqs_ct)
+
+    def test_bad_consequence_cat_returns_none(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo", {
+            "consequence_cat": "candy"
+        })
+        parsed_content = self.parsed_json_response(req)
+        self.assertTrue(len(parsed_content) == 0)
 
 
 class ScraperTests(TestCase):

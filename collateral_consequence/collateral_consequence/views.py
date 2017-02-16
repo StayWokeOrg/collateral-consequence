@@ -76,7 +76,7 @@ def crime_search(request):
 
 
 @api_view(['GET'])
-def consequences_by_state(request, state=None):
+def consequence_pipeline(request, state=None):
     """Given a state, retrieve all consequence objects for that state."""
     state_set = [item[0] for item in STATES]
     state = state.upper()
@@ -84,8 +84,8 @@ def consequences_by_state(request, state=None):
 
         consqs = Consequence.objects.filter(state=state)
         if "offense" in request.GET:
-            offense = request.GET["offense"]
-            consqs = consqs.filter(offense_cat__contains=offense)
+            offenses = dict(request.GET)["offense"]
+            consqs = filter_by_offenses(consqs, offenses)
 
         if "consequence_type" in request.GET:
             the_type = request.GET["consequence_type"]
@@ -100,6 +100,16 @@ def consequences_by_state(request, state=None):
         return Response(serialized.data)
 
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+def filter_by_offenses(query_manager, offenses):
+    """Filter consequences down by offense(s)."""
+    complex_query = Q(offense_cat__contains=offenses[0])
+    if len(offenses) > 1:
+        for offense in offenses[1:]:
+            complex_query |= Q(offense_cat__contains=offenses[1])
+
+    return query_manager.filter(complex_query)
 
 
 def ingest_rows(state):
