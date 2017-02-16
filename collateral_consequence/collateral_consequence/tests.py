@@ -524,4 +524,3 @@ class ResultsViewTests(TestCase):
         """Fill the database with consequences."""
         ingest_rows("NY")
 
-    def test_results_view_gets_200
