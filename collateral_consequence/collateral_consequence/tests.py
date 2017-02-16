@@ -2,7 +2,9 @@
 from collateral_consequence.views import (
     add_state,
     add_all_states,
-    crime_search
+    crime_search,
+    ingest_rows,
+    consequences_by_state
 )
 from collateral_consequence.scraper import get_data
 from crimes.models import Consequence, STATES
@@ -12,6 +14,7 @@ from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse_lazy
 
 from bs4 import BeautifulSoup as Soup
+import json
 import mock
 import os
 import pandas as pd
@@ -46,6 +49,14 @@ class IngestionTests(TestCase):
         user.set_password = "potatoes"
         user.save()
         return user
+
+    @mock.patch(
+        "collateral_consequence.scraper.get_data",
+        return_value=NY_DATA
+    )
+    def fill_db(self, get_data):
+        """Fill the database with consequences."""
+        ingest_rows("NY")
 
     def test_add_state_get_is_200(self):
         """."""
@@ -212,6 +223,49 @@ class IngestionTests(TestCase):
         """."""
         response = self.client.get(reverse_lazy('crime_search'))
         self.assertTemplateUsed(response, "front-end/search.html")
+
+    def test_get_consequences_by_state_is_200(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo")
+        response = consequences_by_state(req, state="NY")
+        self.assertTrue(response.status_code == 200)
+
+    def test_get_consequences_by_lower_state_is_200(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo")
+        response = consequences_by_state(req, state="ny")
+        self.assertTrue(response.status_code == 200)
+
+    def test_get_consequences_returns_json(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo")
+        response = consequences_by_state(req, state="ny")
+        self.assertTrue(response.accepted_media_type == "application/json")
+
+    def test_get_consequences_returns_right_num_consequences(self):
+        """."""
+        self.fill_db()
+        req = self.request_builder.get("/foo")
+        response = consequences_by_state(req, state="ny")
+        parsed_content = json.loads(response.rendered_content.decode('utf8'))
+        self.assertTrue(len(parsed_content) == Consequence.objects.count())
+
+    def test_get_consequences_consequence_has_all_fields(self):
+        """."""
+        self.fill_db()
+        fields = (
+            "id", "title", "citation", "state", "consequence_cat",
+            "consequence_details", "consequence_type", "duration",
+            "duration_desc", "offense_cat"
+        )
+        req = self.request_builder.get("/foo")
+        response = consequences_by_state(req, state="ny")
+        parsed_content = json.loads(response.rendered_content.decode('utf8'))
+        for field in fields:
+            self.assertTrue(field in parsed_content[0])
 
 
 class ScraperTests(TestCase):

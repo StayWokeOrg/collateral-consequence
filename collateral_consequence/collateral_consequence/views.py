@@ -79,7 +79,8 @@ def crime_search(request):
 def consequences_by_state(request, state=None):
     """Given a state, retrieve all consequence objects for that state."""
     state_set = [item[0] for item in STATES]
-    if request.method == "GET" and state.upper() in state_set:
+    state = state.upper()
+    if request.method == "GET" and state in state_set:
 
         consqs = Consequence.objects.filter(state=state)
         if "offense" in request.GET:
