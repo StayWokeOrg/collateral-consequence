@@ -33,8 +33,8 @@ VA_DATA = pd.read_excel(os.path.join(path, "consq_VA.xls"))
 FED_DATA = pd.read_excel(os.path.join(path, "consq_FED.xls"))
 
 
-class IngestionTests(TransactionTestCase): # <-- use for Travis only
-# class IngestionTests(TestCase):
+# class IngestionTests(TransactionTestCase): # <-- use for Travis only
+class IngestionTests(TestCase):
     """Test ingestion pipeline."""
 
     def setUp(self):
