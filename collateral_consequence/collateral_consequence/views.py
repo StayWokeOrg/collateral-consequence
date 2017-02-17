@@ -85,9 +85,15 @@ def consequence_pipeline(request, state=None):
     state = state.upper()
     if request.method == "GET" and state in state_set:
 
-        consqs = Consequence.objects.filter(state=state)
+        consqs = Consequence.objects.filter(
+            state=state,
+            duration__in=["perm", "spec"]
+        )
+
         if "offense" in request.GET:
             offenses = dict(request.GET)["offense"]
+            offenses.append("Any offense")
+
             if "felony" in request.GET:
                 offenses.append("felony")
             if "misdem" in request.GET:
@@ -194,6 +200,8 @@ def home_view(request):
             data[item[0]]["count"] = consqs.filter(
                 offense_cat__contains=item[1]
             ).count()
+
+    data["any"]["count"] = consqs.filter(offense_cat__contains="Any offense").count()
     return render(request, "front-end/home.html", {"data": data})
 
 

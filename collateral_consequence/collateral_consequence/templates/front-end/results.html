@@ -3,7 +3,7 @@
 <div class="row">
     <div class="large-12 columns panel center">
         <h1 class="center">Results</h1>
-    {{ count }} consequences were found. Click on the headings below to load them by category.
+    {{ count }} consequences were found. Click on the headings below to load them by category. Note that some consequences are in multiple categories.
     </div>
 
     <div class="large-12 columns panel">
@@ -186,7 +186,7 @@
             {% endif %}
 
             $.get(fetch_me, function(data){
-                // console.log(fetch_me);
+                console.log(fetch_me);
                 // console.log(data);
                 var mandatory_list = $("#" + category + "-content ul.mandatory"),
                     bkgd_list = $("#" + category + "-content ul.background");

@@ -6,9 +6,17 @@
         <form id="state-form">
             <label for="state-list">In what state/U.S. territory are you charged?</label>
             <select id="state-list" name="state-list" required>
-                {% for estados in states %}
-                <option value="{{ estados.title }}">{{ estados.text }}</option>
-                {% endfor %}
+                {% if False %}
+                    {% for estados in states %}
+                    <option value="{{ estados.title }}">{{ estados.text }}</option>
+                    {% endfor %}
+                {% endif %}
+                <option value="---">Choose a State</option>
+                <option value="DC">Washington, D.C.</option>
+                <option value="FED">Federal Level</option>
+                <option value="NY">New York</option>
+                <option value="VA">Virginia</option>
+                <option value="WA">Washington</option>
             </select>
             <button type="submit" class="button" id="state-btn">Continue</button>
         </form>

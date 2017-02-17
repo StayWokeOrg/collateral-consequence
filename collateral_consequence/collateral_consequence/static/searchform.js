@@ -55,7 +55,6 @@ $(document).ready(function(){
                 }
             }
             this.query_url = output;
-            debugger;
             window.location = this.query_url;
         },
     }
