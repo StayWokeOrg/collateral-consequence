@@ -88,6 +88,10 @@ def consequence_pipeline(request, state=None):
         consqs = Consequence.objects.filter(state=state)
         if "offense" in request.GET:
             offenses = dict(request.GET)["offense"]
+            if "felony" in request.GET:
+                offenses.append("felony")
+            if "misdem" in request.GET:
+                offenses.append("misdemeanor")
             consqs = filter_by_offenses(consqs, offenses)
 
         if "consequence_type" in request.GET:
@@ -201,6 +205,7 @@ def results_view(request, state=None):
         duration__in=["perm", "spec"]
     )
     url_data = dict(request.GET)
+    url_data["state"] = state
     offense_list = ["Any offense"]
 
     if "felony" in url_data:
@@ -217,11 +222,12 @@ def results_view(request, state=None):
                 pass
 
     result = filter_by_offenses(consqs, offense_list)
-    context["mandatory"] = result.filter(
-        consequence_type__contains="Mandatory"
-    ).all()
-    context["possible"] = result.filter(
-        consequence_type__contains="Discretionary"
-    ).all()  # don't forget to exclude discretionary and discretionary (waiver)
+    # context["mandatory"] = result.filter(
+    #     consequence_type__contains="Mandatory"
+    # ).all()
+    # context["possible"] = result.filter(
+    #     consequence_type__contains="Background"
+    # ).all()  # don't forget to exclude discretionary and discretionary (waiver)
     context["count"] = result.count()
+    context["query_params"] = url_data
     return render(request, "front-end/results.html", context)
