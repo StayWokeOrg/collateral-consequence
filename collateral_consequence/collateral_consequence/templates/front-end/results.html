@@ -9,98 +9,140 @@
     <div class="large-12 columns panel">
         <h2 class="center" id="family">Family/Domestic Rights <button>View</button></h2>
         <div id="family-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="vehicle">Driver's Licenses <button>View</button></h2>
         <div id="vehicle-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="occupational">Work Licenses and Certifications <button>View</button></h2>
         <div id="occupational-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="benefits">Government Benefits <button>View</button></h2>
         <div id="benefits-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="housing">Housing <button>View</button></h2>
         <div id="housing-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="employment">Employment <button>View</button></h2>
         <div id="employment-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="registration">Registration, Notification, and Registry Restrictions <button>View</button></h2>
         <div id="registration-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="education">Education <button>View</button></h2>
         <div id="education-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="contracting">Government Contracting and Program Participation <button>View</button></h2>
         <div id="contracting-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="loans">Government Loans and Grants <button>View</button></h2>
         <div id="loans-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="recreational">Recreational and Weapons Licenses <button>View</button></h2>
         <div id="recreational-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="business">Business License and Other Property Rights <button>View</button></h2>
         <div id="business-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="political">Political and Civic Participation <button>View</button></h2>
         <div id="political-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 
     <div class="large-12 columns panel">
         <h2 class="center" id="judicial">Judicial Rights <button>View</button></h2>
         <div id="judicial-content">
-            <ul></ul>
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
         </div>
     </div>
 </div>
@@ -146,10 +188,17 @@
             $.get(fetch_me, function(data){
                 // console.log(fetch_me);
                 // console.log(data);
-                var list = $("#" + category + "-content ul");
+                var mandatory_list = $("#" + category + "-content ul.mandatory"),
+                    bkgd_list = $("#" + category + "-content ul.background");
+
                 for (var i=0; i < data.length; i++) {
                     var item = "<li>" + data[i].title + "</li>";
-                    list.append(item);
+                    if (data[i].consequence_type[0] === "Mandatory/Automatic") {
+                        mandatory_list.append(item);
+                    } else {
+                        bkgd_list.append(item);   
+                    }
+
                 }
             });
         };

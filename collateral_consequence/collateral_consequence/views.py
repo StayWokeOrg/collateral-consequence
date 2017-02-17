@@ -102,7 +102,7 @@ def consequence_pipeline(request, state=None):
             the_cat = request.GET["consequence_cat"]
             consqs = consqs.filter(consequence_cat__contains=the_cat)
 
-        consqs = consqs.all()
+        consqs = consqs.exclude(consequence_type__contains="Discretion").all()
         serialized = ConsequenceSerializer(consqs, many=True)
         return Response(serialized.data)
 
@@ -221,7 +221,7 @@ def results_view(request, state=None):
             except KeyError:
                 pass
 
-    result = filter_by_offenses(consqs, offense_list)
+    result = filter_by_offenses(consqs, offense_list).exclude(consequence_type__contains="Discretion")
     # context["mandatory"] = result.filter(
     #     consequence_type__contains="Mandatory"
     # ).all()
