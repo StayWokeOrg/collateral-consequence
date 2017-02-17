@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="row">
-    <div class="large-12 columns panel center">
+    <div class="large-12 columns panel center" next="crime_type">
         <h1 class="center">Get Informed About your Charges</h1>
         <form id="state-form">
-            <label for="state-list">In what state are you charged?</label>
+            <label for="state-list">In what state/U.S. territory are you charged?</label>
             <select id="state-list" name="state-list" required>
                 {% for estados in states %}
                 <option value="{{ estados.title }}">{{ estados.text }}</option>
@@ -13,7 +13,8 @@
             <button type="submit" class="button" id="state-btn">Continue</button>
         </form>
     </div>
-    <div class="large-12 columns panel">
+
+    <div class="large-12 columns panel hide" id="crime_type" next="offenses">
         <p class="center" id="felony">
             Is one or more of your charges a felony?
             <button type="button" class="button info" value="true">Yes</button>
@@ -25,14 +26,42 @@
             <button type="button" class="button" value="false">No</button>
         </p>
     </div>
-    <div class="large-12 columns panel center" id="offenses">
+
+    <div class="large-12 columns panel center hide" id="offenses" next="citizenship">
         <h4>We can narrow the consequences if we know more about the offenses. Click as many as apply to your charges</h4>
         {% for item in offenses %}
         <button type="button" class="button" value="{{ item.title }}">{{ item.text }}</button>
         {% endfor %}
     </div>
-    <div class="large-12 columns panel center">
-    <button type="button" class="button" id="submit-request">See the Consequences</button>
+
+    <div class="large-12 columns panel center hide" id="citizenship" next="benefits">
+        <p class="center">
+            Are you a United States citizen?
+            <button type="button" class="button" value="true">Yes</button>
+            <button type="button" class="button info" value="false">No</button>
+        </p>
+    </div>
+
+    <div class="large-12 columns panel center hide" id="benefits" next="housing">
+        <p class="center">
+            Do you currently receive government benefits? (for example, food stamps)
+            <button type="button" class="button info" value="true">Yes</button>
+            <button type="button" class="button" value="false">No</button>
+        </p>
+    </div>
+
+    <div class="large-12 columns panel center hide" id="housing">
+        <p class="center">
+            Do you currently receive government housing assistance?
+            <button type="button" class="button info" value="true">Yes</button>
+            <button type="button" class="button" value="false">No</button>
+        </p>
+    </div>
+
+    <div class="large-12 columns panel center hide" id="submission">
+    <button type="button" class="button" id="submit-request">
+        See the Consequences
+    </button>
     </div>
 </div>
 {% endblock %}

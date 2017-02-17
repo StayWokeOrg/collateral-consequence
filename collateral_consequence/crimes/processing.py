@@ -74,7 +74,9 @@ def strip_column(data, column_name):
 def remove_non_offenses(data):
     """No need for rows that aren't offenses."""
     column = "Triggering Offense Category"
-    return data[data[column].map(lambda x: "N/A" not in x and "None" not in x)]
+    return data[data[column].map(
+        lambda x: "None" not in x
+    )]
 
 
 if __name__ == "__main__":  # pragma: no cover

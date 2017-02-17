@@ -23,7 +23,9 @@ from urllib.error import HTTPError
 @permission_required("crimes.add_consequence")
 def add_all_states(request):
     """Retrieve and add a state's data to the database."""
-    states = ["NY", "WA", "DC", "FED", "VA"]
+    states = [
+        "NY", "WA", "DC", "FED", "VA",
+    ]
 
     for state in states:
         try:
@@ -217,9 +219,9 @@ def results_view(request, state=None):
     result = filter_by_offenses(consqs, offense_list)
     context["mandatory"] = result.filter(
         consequence_type__contains="Mandatory"
-    ).exclude(consequence_type__contains="bkg").all()
+    ).all()
     context["possible"] = result.filter(
         consequence_type__contains="Discretionary"
-    ).exclude(consequence_type__contains="bkg").all()
-    context["count"] = result.exclude(consequence_type__contains="bkg").count()
+    ).all()  # don't forget to exclude discretionary and discretionary (waiver)
+    context["count"] = result.count()
     return render(request, "front-end/results.html", context)
