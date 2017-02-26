@@ -18,7 +18,7 @@ $ python3 -m venv .
 - Activate the virtual environment, so that the requirements will be installed there.
 
 ```bash
-$ ./bin/activate
+$ source bin/activate
 ```
 
 - Type `pip install -r requirements.pip` to install all of the related Python packages
