@@ -1,7 +1,7 @@
 """Views for the collateral_consequence app."""
 from collateral_consequence import scraper
 from collateral_consequence.forms import StateForm
-from collateral_conseuqence.utils import (
+from collateral_consequence.utils import (
     filter_by_offenses,
     ingest_rows
 )
@@ -146,28 +146,27 @@ def results_view(request, state=None):
     )
     url_data = dict(request.GET)
     url_data["state"] = state
-    offense_list = ["Any offense"]
+
+    offense_list = []
 
     if "felony" in url_data:
         offense_list.append("felony")
+        offense_list.append("Any offense")
 
     if "misdem" in url_data:
         offense_list.append("misdemeanor")
+        offense_list.append("Any offense")
 
     if "offense" in url_data:
+        offense_list.append("Any offense")
         for offense in url_data["offense"]:
             try:
                 offense_list.append(dict(OFFENSE_CATEGORIES)[offense])
             except KeyError:
                 pass
 
-    result = filter_by_offenses(consqs, offense_list).exclude(consequence_type__contains="Discretion")
-    # context["mandatory"] = result.filter(
-    #     consequence_type__contains="Mandatory"
-    # ).all()
-    # context["possible"] = result.filter(
-    #     consequence_type__contains="Background"
-    # ).all()  # don't forget to exclude discretionary and discretionary (waiver)
+    consqs = filter_by_offenses(consqs, offense_list)
+    result = consqs.exclude(consequence_type__contains="Discretion")
     context["count"] = result.count()
     context["query_params"] = url_data
     return render(request, "front-end/results.html", context)

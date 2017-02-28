@@ -9,12 +9,14 @@ from django.db.transaction import TransactionManagementError
 
 def filter_by_offenses(query_manager, offenses):
     """Filter consequences down by offense(s)."""
-    complex_query = Q(offense_cat__contains=offenses[0])
-    if len(offenses) > 1:
-        for offense in offenses[1:]:
-            complex_query |= Q(offense_cat__contains=offense)
+    if offenses:
+        complex_query = Q(offense_cat__contains=offenses[0])
+        if len(offenses) > 1:
+            for offense in offenses[1:]:
+                complex_query |= Q(offense_cat__contains=offense)
 
-    return query_manager.filter(complex_query)
+        return query_manager.filter(complex_query)
+    return query_manager
 
 
 def ingest_rows(state):

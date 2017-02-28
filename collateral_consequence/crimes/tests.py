@@ -132,12 +132,6 @@ class ProcessingTests(TestCase):
         """We have no need for rows that are not offenses."""
         result = remove_non_offenses(self.sheet.fillna("None"))
         for item in result["Triggering Offense Category"]:
-            self.assertTrue("N/A" not in item)
-
-    def test_non_offenses_get_removed2(self):
-        """We have no need for rows that are not offenses."""
-        result = remove_non_offenses(self.sheet.fillna("None"))
-        for item in result["Triggering Offense Category"]:
             self.assertTrue("None" not in item)
 
     def test_reduce_columns_only_keeps_specified_columns(self):
