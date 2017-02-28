@@ -1,10 +1,11 @@
 """Warehouse for utility functions for views."""
 from collateral_consequence import scraper
-from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
+from crimes.models import Consequence
 from crimes.processing import process_spreadsheet
 
 from django.db.models import Q
 from django.db.transaction import TransactionManagementError
+from django.db.utils import DataError
 
 
 def filter_by_offenses(query_manager, offenses):
