@@ -11,8 +11,14 @@ We hope that by making it easier to access this information, we can also help to
 - Clone this repository
 - Navigate into the repo and set up a virtual environment with the following command:
 
-```python
+```bash
 $ python3 -m venv .
+```
+
+- Activate the virtual environment, so that the requirements will be installed there.
+
+```bash
+$ source bin/activate
 ```
 
 - Type `pip install -r requirements.pip` to install all of the related Python packages
