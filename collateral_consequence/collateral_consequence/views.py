@@ -31,8 +31,8 @@ def add_all_states(request):
         try:
             ingest_rows(state)
 
-        except HTTPError:
-            print("{} failed".format(state))
+        except HTTPError as msg:
+            print("{} failed. Here's the message: {}".format(state, msg))
 
     return render(
         request,
@@ -63,6 +63,12 @@ def add_state(request):
     return render(
         request, "main/ingest_ready.html", {"form": StateForm()}
     )
+
+
+@permission_required("crimes.add_consequence")
+def add_state_from_file(request):
+    """Upload and add a state's data to the database."""
+    return render(request, "", {})
 
 
 def crime_search(request):
