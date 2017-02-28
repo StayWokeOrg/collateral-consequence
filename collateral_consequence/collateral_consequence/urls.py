@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^manage/add_state$', views.add_state, name="add_state"),
     url(r'^manage/add_all_states$', views.add_all_states, name="add_states"),
+    url(r'^manage/add_state_from_file$', views.add_state_from_file, name="add_from_file"),
     url(r'^api/consequences/(?P<state>\w+)/$', views.consequence_pipeline, name="api_consequences")
 ]
 

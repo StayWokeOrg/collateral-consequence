@@ -1,9 +1,10 @@
 """Views for the collateral_consequence app."""
 from collateral_consequence import scraper
-from collateral_consequence.forms import StateForm
+from collateral_consequence.forms import StateForm, DataForm
 from collateral_consequence.utils import (
     filter_by_offenses,
-    ingest_rows
+    ingest_from_remote,
+    handle_uploaded_file
 )
 from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
 from crimes.serializers import ConsequenceSerializer
@@ -29,9 +30,9 @@ def add_all_states(request):
 
     for state in states:
         try:
-            ingest_rows(state)
+            ingest_from_remote(state)
 
-        except HTTPError as msg:
+        except HTTPError as msg:  # pragma: no cover
             print("{} failed. Here's the message: {}".format(state, msg))
 
     return render(
@@ -48,7 +49,7 @@ def add_state(request):
         state = request.POST["state"].upper()
 
         try:
-            ingest_rows(state)
+            ingest_from_remote(state)
 
             return render(
                 request,
@@ -68,7 +69,19 @@ def add_state(request):
 @permission_required("crimes.add_consequence")
 def add_state_from_file(request):
     """Upload and add a state's data to the database."""
-    return render(request, "", {})
+    if request.POST and request.method == "POST":
+        state = request.POST["state"]
+        data_file = request.FILES["upload_path"]
+        handle_uploaded_file(data_file, state)
+        return render(
+            request,
+            "main/ingest_success.html",
+            {"location": state, "address": "From disk"}
+        )
+
+    return render(request, "main/ingest_file.html", {
+        "form": DataForm()
+    })
 
 
 def crime_search(request):
@@ -133,7 +146,9 @@ def home_view(request):
                 offense_cat__contains=item[1]
             ).count()
 
-    data["any"]["count"] = consqs.filter(offense_cat__contains="Any offense").count()
+    data["any"]["count"] = consqs.filter(
+        offense_cat__contains="Any offense"
+    ).count()
     return render(request, "front-end/home.html", {"data": data})
 
 

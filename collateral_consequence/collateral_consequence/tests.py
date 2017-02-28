@@ -2,15 +2,18 @@
 from collateral_consequence.views import (
     add_state,
     add_all_states,
+    add_state_from_file,
     consequence_pipeline,
     crime_search,
     home_view,
 )
-from collateral_consequence.utils import ingest_rows
+from collateral_consequence.settings import BASE_DIR
 from collateral_consequence.scraper import get_data
+from collateral_consequence.utils import ingest_from_remote
 from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
 
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.test import TestCase, Client, RequestFactory
 # from django.test import TransactionTestCase
@@ -32,6 +35,9 @@ WA_DATA = pd.read_excel(os.path.join(path, "consq_WA.xls"))
 DC_DATA = pd.read_excel(os.path.join(path, "consq_DC.xls"))
 VA_DATA = pd.read_excel(os.path.join(path, "consq_VA.xls"))
 FED_DATA = pd.read_excel(os.path.join(path, "consq_FED.xls"))
+
+with open(os.path.join(path, "consq_NY.xls"), 'rb') as infile:
+    RAW_NY_DATA = infile.read()
 
 
 # class IngestionTests(TransactionTestCase): # <-- use for Travis only
@@ -60,7 +66,7 @@ class IngestionTests(TestCase):
     )
     def fill_db(self, get_data):
         """Fill the database with consequences."""
-        ingest_rows("NY")
+        ingest_from_remote("NY")
 
     def test_add_state_get_is_200(self):
         """."""
@@ -175,6 +181,60 @@ class IngestionTests(TestCase):
         response = add_all_states(req)
         self.assertTrue(response.status_code == 302)
 
+    def test_add_from_file_status_302_not_user_set(self):
+        """."""
+        req = self.request_builder.get("/foo-bar")
+        req.user = self.unauth_user
+        response = add_state_from_file(req)
+        self.assertTrue(response.status_code == 302)
+
+    def test_add_from_file_is_status_200_auth_user(self):
+        """."""
+        req = self.request_builder.get("/foo-bar")
+        req.user = self.auth_user
+        response = add_state_from_file(req)
+        self.assertTrue(response.status_code == 200)
+
+    def test_add_from_file_shows_form_elements_on_page(self):
+        """."""
+        req = self.request_builder.get("/foo-bar")
+        req.user = self.auth_user
+        response = add_state_from_file(req)
+        html = Soup(response.content, "html5lib")
+        states = html.find_all("option")
+        file_field = html.find("input", {"type": "file"})
+        self.assertTrue(len(states) == len(STATES) - 1)
+        self.assertIsNotNone(file_field)
+
+    def test_add_from_file_post_adds_data(self):
+        """."""
+        req = self.request_builder.post("/foo-bar", {
+            "state": "NY"
+        })
+        file_path = os.path.join(path, "consq_NY.xls")
+        req.FILES["upload_path"] = SimpleUploadedFile(
+            file_path,
+            RAW_NY_DATA
+        )
+        req.user = self.auth_user
+        add_state_from_file(req)
+        self.assertTrue(Consequence.objects.count() > 0)
+
+    def test_add_removes_temp_file(self):
+        """."""
+        req = self.request_builder.post("/foo-bar", {
+            "state": "NY"
+        })
+        file_path = os.path.join(path, "consq_NY.xls")
+        req.FILES["upload_path"] = SimpleUploadedFile(
+            file_path,
+            RAW_NY_DATA
+        )
+        req.user = self.auth_user
+        add_state_from_file(req)
+        tmpdir = os.path.join(BASE_DIR, "tmp")
+        self.assertTrue("consq_NY.xls" not in os.listdir(tmpdir))
+
 
 class SearchTests(TestCase):
     """Test search pipeline."""
@@ -190,7 +250,7 @@ class SearchTests(TestCase):
     )
     def fill_db(self, get_data):
         """Fill the database with consequences."""
-        ingest_rows("NY")
+        ingest_from_remote("NY")
 
     def parsed_json_response(self, request):
         """."""
@@ -492,7 +552,7 @@ class HomeViewTests(TestCase):
     )
     def fill_db(self, get_data):
         """Fill the database with consequences."""
-        ingest_rows("NY")
+        ingest_from_remote("NY")
 
     def test_home_view_returns_200(self):
         """."""
@@ -552,7 +612,7 @@ class ResultsViewTests(TestCase):
     )
     def fill_db(self, get_data):
         """Fill the database with consequences."""
-        ingest_rows("NY")
+        ingest_from_remote("NY")
 
     def test_get_results_route_is_200(self):
         """."""

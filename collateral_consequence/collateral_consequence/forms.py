@@ -12,3 +12,10 @@ class StateForm(forms.Form):
     """Form for choosing a state to upload."""
 
     state = forms.ChoiceField(choices=states_reversed)
+
+
+class DataForm(forms.Form):
+    """Form for choosing a state to upload."""
+
+    state = forms.ChoiceField(choices=states_reversed)
+    upload_file = forms.FileField()

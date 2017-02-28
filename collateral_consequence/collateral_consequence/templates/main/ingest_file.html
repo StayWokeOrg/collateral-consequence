@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block body %}
+<p>Choose a file to upload into the database.</p>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Load Data" />
+</form>
+{% endblock %}
