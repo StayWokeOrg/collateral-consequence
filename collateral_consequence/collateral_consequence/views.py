@@ -125,7 +125,6 @@ def consequence_pipeline(request, state=None):
         if "consequence_cat" in request.GET:
             the_cat = request.GET["consequence_cat"]
             consqs = consqs.filter(consequence_cat__contains=the_cat)
-
         consqs = consqs.exclude(consequence_type__contains="Discretion").all()
         serialized = ConsequenceSerializer(consqs, many=True)
         return Response(serialized.data)
