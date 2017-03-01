@@ -156,7 +156,7 @@ def results_view(request, state=None):
     """Harvest data and get the search results."""
     context = {}
     consqs = Consequence.objects.filter(
-        state=state,
+        state=state.lower(),
         duration__in=["perm", "spec"]
     )
     url_data = dict(request.GET)
