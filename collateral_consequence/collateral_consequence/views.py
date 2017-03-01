@@ -101,11 +101,10 @@ def crime_search(request):
 def consequence_pipeline(request, state=None):
     """Given a state, retrieve all consequence objects for that state."""
     state_set = [item[0] for item in STATES]
-    state = state.upper()
-    if request.method == "GET" and state in state_set:
+    if request.method == "GET" and state.upper() in state_set:
 
         consqs = Consequence.objects.filter(
-            state=state,
+            state=state.lower(),
             duration__in=["perm", "spec"]
         )
 
