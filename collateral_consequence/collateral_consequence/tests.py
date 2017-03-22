@@ -322,7 +322,7 @@ class SearchTests(TestCase):
         """."""
         self.fill_db()
         req = self.request_builder.get("/foo")
-        response = consequence_pipeline(req, state="NY")
+        response = consequence_pipeline(req, state="ny")
         self.assertTrue(response.status_code == 200)
 
     def test_get_consequences_by_lower_state_is_200(self):
@@ -345,7 +345,7 @@ class SearchTests(TestCase):
         req = self.request_builder.get("/foo")
         parsed_content = self.parsed_json_response(req)
         consqs = Consequence.objects.filter(
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion")
         self.assertTrue(len(parsed_content) == consqs.count())
@@ -385,7 +385,7 @@ class SearchTests(TestCase):
         complex_query = self.complex_query(["felony", "Any offense"])
         felony_consequences = Consequence.objects.filter(
             complex_query,
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertTrue(len(parsed_content) == felony_consequences)
@@ -399,7 +399,7 @@ class SearchTests(TestCase):
         parsed_content = self.parsed_json_response(req)
         result_count = Consequence.objects.filter(
             offense_cat__contains="Any offense",
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertTrue(len(parsed_content) == result_count)
@@ -415,7 +415,7 @@ class SearchTests(TestCase):
             "vehicle", "weapons", "Any Offense"
         ])
         result_count = Consequence.objects.filter(
-            complex_query, state="NY", duration__in=["perm", "spec"]
+            complex_query, state="ny", duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertTrue(len(parsed_content) == result_count)
 
@@ -429,7 +429,7 @@ class SearchTests(TestCase):
         mandatories = Consequence.objects.filter(
             # offense_cat__contains="Any offense",
             consequence_type__contains="auto",
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertTrue(len(parsed_content) == mandatories)
@@ -454,7 +454,7 @@ class SearchTests(TestCase):
         complex_query = self.complex_query(["weapons", "Any offense"])
         consqs_ct = Consequence.objects.filter(
             complex_query,
-            state="NY",
+            state="ny",
             consequence_type__contains="auto",
             duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion").count()
@@ -473,7 +473,7 @@ class SearchTests(TestCase):
         ])
         consqs_ct = Consequence.objects.filter(
             complex_query,
-            state="NY",
+            state="ny",
             consequence_type__contains="auto",
             duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion").count()
@@ -500,7 +500,7 @@ class SearchTests(TestCase):
         complex_query = self.complex_query(["weapons", "Any offense"])
         consqs_ct = Consequence.objects.filter(
             complex_query,
-            state="NY",
+            state="ny",
             consequence_type__contains="auto",
             duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion").count()
@@ -514,7 +514,7 @@ class SearchTests(TestCase):
         })
         parsed_content = self.parsed_json_response(req)
         consqs_ct = Consequence.objects.filter(
-            state="NY",
+            state="ny",
             consequence_cat__contains="education"
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertTrue(len(parsed_content) == consqs_ct)
@@ -631,7 +631,7 @@ class ResultsViewTests(TestCase):
             "felony": True
         })
         felony_ct = Consequence.objects.filter(
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"],
             offense_cat__contains="felony"
         ).exclude(consequence_type__contains="Discretion").count()
@@ -645,7 +645,7 @@ class ResultsViewTests(TestCase):
             "misdem": True
         })
         misdem_ct = Consequence.objects.filter(
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"],
             offense_cat__contains="misdemeanor"
         ).exclude(consequence_type__contains="Discretion").count()
@@ -663,7 +663,7 @@ class ResultsViewTests(TestCase):
         qry |= Q(offense_cat__contains="Any offense")
         consqs_ct = Consequence.objects.filter(
             qry,
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"],
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertEqual(response.context["count"], consqs_ct)
@@ -679,7 +679,7 @@ class ResultsViewTests(TestCase):
         qry |= Q(offense_cat__contains="Any offense")
         consqs_ct = Consequence.objects.filter(
             qry,
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"],
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertEqual(response.context["count"], consqs_ct)
@@ -696,7 +696,7 @@ class ResultsViewTests(TestCase):
         qry |= Q(offense_cat__contains="Any offense")
         consqs_ct = Consequence.objects.filter(
             qry,
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"],
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertEqual(response.context["count"], consqs_ct)
@@ -711,7 +711,7 @@ class ResultsViewTests(TestCase):
         qry = Q(offense_cat__contains="Any offense")
         consqs_ct = Consequence.objects.filter(
             qry,
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"],
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertEqual(response.context["count"], consqs_ct)
@@ -727,7 +727,7 @@ class ResultsViewTests(TestCase):
         qry |= Q(offense_cat__contains="Any offense")
         consqs_ct = Consequence.objects.filter(
             qry,
-            state="NY",
+            state="ny",
             duration__in=["perm", "spec"],
         ).exclude(consequence_type__contains="Discretion").count()
         self.assertEqual(response.context["count"], consqs_ct)

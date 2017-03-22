@@ -58,7 +58,7 @@ def ingest_rows(data_file, state):
     for idx in range(len(data_file)):
         citation = data_file.iloc[idx]
         offenses, categories, con_types = parse_multi_input_columns(citation)
-        save_new_consequence(citation, offenses, categories, con_types, state)
+        save_new_consequence(citation, offenses, categories, con_types, state.lower())
 
 
 def parse_multi_input_columns(citation):
