@@ -88,12 +88,12 @@ def crime_search(request):
     """Retrieve a crime's consequences based on criteria."""
     states = [{"title": state[0], "text": state[1]} for state in STATES]
     skip_these = ["misc", "---", "felony", "misdem", "any"]
-    offs = [{"title": off[0], "text": off[1]}
-            for off in OFFENSE_CATEGORIES if off[0] not in skip_these]
+    offenses = [{"title": off[0], "text": off[1]}
+                for off in OFFENSE_CATEGORIES if off[0] not in skip_these]
 
     return render(request, "front-end/search.html", {
         "states": states,
-        "offenses": offs
+        "offenses": offenses
     })
 
 
@@ -125,6 +125,7 @@ def consequence_pipeline(request, state=None):
         if "consequence_cat" in request.GET:
             the_cat = request.GET["consequence_cat"]
             consqs = consqs.filter(consequence_cat__contains=the_cat)
+
         consqs = consqs.exclude(consequence_type__contains="Discretion").all()
         serialized = ConsequenceSerializer(consqs, many=True)
         return Response(serialized.data)
@@ -177,6 +178,15 @@ def results_view(request, state=None):
                 offense_list.append(dict(OFFENSE_CATEGORIES)[offense])
             except KeyError:
                 pass
+
+    # TODO: post message if not a us citizen
+    # -- something about asking about potential immigration consequences
+
+    # TODO: filter down if receiving government benefits
+    # -- if user isn't on government benefits, hide consequence category
+
+    # TODO: filter down if living in government housing
+    # -- if user isn't living in government housing, hide consequence category
 
     consqs = filter_by_offenses(consqs, offense_list)
     result = consqs.exclude(consequence_type__contains="Discretion")
