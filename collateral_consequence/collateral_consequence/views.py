@@ -109,8 +109,13 @@ def consequence_pipeline(request, state=None):
         )
 
         if "offense" in request.GET:
-            offenses = dict(request.GET)["offense"]
+            offenses = []
             offenses.append("Any offense")
+            for offense in dict(request.GET)["offense"]:
+                try:
+                    offenses.append(dict(OFFENSE_CATEGORIES)[offense])
+                except KeyError:
+                    pass
 
             if "felony" in request.GET:
                 offenses.append("felony")
