@@ -416,7 +416,7 @@ class SearchTests(TestCase):
         })
         parsed_content = self.parsed_json_response(req)
         complex_query = self.complex_query([
-            "vehicle", "Weapons", "Any Offense"
+            "vehicle", "Weapons", "Any offense"
         ])
         result_count = Consequence.objects.filter(
             complex_query, state="ny", duration__in=["perm", "spec"]
