@@ -16,6 +16,7 @@ script:
   - export DB_NAME='travisdb'
   - export DB_HOST='localhost'
   - export SECRET_KEY='potatotest'
+  - export TRAVIS_TESTS='True'
   - cd collateral_consequence
   - python manage.py migrate
   - coverage run manage.py test

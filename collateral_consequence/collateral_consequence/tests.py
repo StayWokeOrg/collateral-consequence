@@ -15,8 +15,6 @@ from crimes.models import Consequence, STATES, OFFENSE_CATEGORIES
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
-from django.test import TestCase, Client, RequestFactory
-# from django.test import TransactionTestCase
 from django.urls import reverse_lazy
 
 from bs4 import BeautifulSoup as Soup
@@ -24,6 +22,12 @@ import json
 import mock
 import os
 import pandas as pd
+
+if 'TRAVIS_TESTS' in os.environ:
+    from django.test import TransactionTestCase as TestCase
+    from django.test import Client, RequestFactory
+else:
+    from django.test import TestCase, Client, RequestFactory
 
 
 path = os.path.join(
