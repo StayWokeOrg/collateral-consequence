@@ -12,8 +12,14 @@ We hope that by making it easier to access this information, we can also help to
 - Clone this repository
 - Navigate into the repo and set up a virtual environment with the following command:
 
-```python
+```bash
 $ python3 -m venv .
+```
+
+- Activate the virtual environment, so that the requirements will be installed there.
+
+```bash
+$ source bin/activate
 ```
 
 - Type `pip install -r requirements.pip` to install all of the related Python packages
@@ -42,7 +48,6 @@ Copyright (C) 2016 by Ian Webster (http://www.ianww.com)
 
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
-
 
 # Technical Details and Development Goals for Collateral Consequence
 
