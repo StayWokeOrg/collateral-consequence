@@ -1,0 +1,216 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+    <div class="large-12 columns panel center" next="crime_type">
+        <h1 class="center">Get Informed About your Charges</h1>
+        <form id="state-form">
+            <label for="state-list">In what state/U.S. territory are you charged?</label>
+            <select id="state-list" name="state-list" required>
+                {% if False %}
+                    {% for estados in states %}
+                    <option value="{{ estados.title }}">{{ estados.text }}</option>
+                    {% endfor %}
+                {% endif %}
+                <option value="---">Choose a State</option>
+                <option value="DC">Washington, D.C.</option>
+                <option value="FED">Federal Level</option>
+                <option value="NY">New York</option>
+                <option value="VA">Virginia</option>
+                <option value="WA">Washington</option>
+            </select>
+            <button type="submit" class="button" id="state-btn">Continue</button>
+        </form>
+    </div>
+
+    <div class="large-12 columns panel hide" id="crime_type" next="offenses">
+        <p class="center" id="felony">
+            Is one or more of your charges a felony?
+            <button type="button" class="button info" value="true">Yes</button>
+            <button type="button" class="button" value="false">No</button>
+        </p>
+        <p class="center" id="misdem">
+            Is one or more of your charges a misdemeanor?
+            <button type="button" class="button info" value="true">Yes</button>
+            <button type="button" class="button" value="false">No</button>
+        </p>
+    </div>
+
+    <div class="large-12 columns panel center hide" id="offenses" next="citizenship">
+        <h4>We can narrow the consequences if we know more about the offenses. Click as many as apply to your charges</h4>
+        {% for item in offenses %}
+        <button type="button" class="button" value="{{ item.title }}">{{ item.text }}</button>
+        {% endfor %}
+    </div>
+
+    <div class="large-12 columns panel center hide" id="citizenship" next="benefits">
+        <p class="center">
+            Are you a United States citizen?
+            <button type="button" class="button" value="true">Yes</button>
+            <button type="button" class="button info" value="false">No</button>
+        </p>
+    </div>
+
+    <div class="large-12 columns panel center hide" id="benefits" next="housing">
+        <p class="center">
+            Do you currently receive government benefits? (for example, food stamps)
+            <button type="button" class="button info" value="true">Yes</button>
+            <button type="button" class="button" value="false">No</button>
+        </p>
+    </div>
+
+    <div class="large-12 columns panel center hide" id="housing">
+        <p class="center">
+            Do you currently receive government housing assistance?
+            <button type="button" class="button info" value="true">Yes</button>
+            <button type="button" class="button" value="false">No</button>
+        </p>
+    </div>
+
+    <div class="large-12 columns panel center hide" id="submission">
+    <button type="button" class="button" id="submit-request">
+        See the Consequences
+    </button>
+    </div>
+</div>
+{% endblock %}
+
+{% load static %}
+{% block javascript %}
+<script type="text/javascript">
+$(document).ready(function(){
+
+    var search_query = {
+        state: null,
+        felony: false,
+        misdemeanor: false,
+        citizenship: true,
+        benefits: false,
+        housing: false,
+        offenses: [],
+        query_url: null,
+        get_state: function(){
+            var options = $("option");
+            for (var i=0; i < options.length; i++) {
+                if (options[i].selected) {
+                    this.state = options[i].value;
+                    break;
+                }
+            }
+        },
+        get_offenses: function(){
+            var offenses = $("#offenses .secondary"),
+                to_apply = [];
+            for (var i=0; i < offenses.length; i++) {
+                to_apply.push(offenses[i].value);
+            }
+            this.offenses = to_apply;
+        },
+        build_query: function(){
+            var output = '/results/',
+                join = '&';
+
+            output += this.state + "/?";
+            if (this.felony) {
+                output += "felony=True" + join;
+            }
+            if (this.misdemeanor) {
+                output += "misdem=True" + join;
+            }
+            if (this.citizenship) {
+                output += "citizen=True" + join;
+            }
+            if (this.benefits) {
+                output += "benefits=True" + join;
+            }
+            if (this.housing) {
+                output += "housing=True" + join;
+            }
+            if (this.offenses) {
+                for (var i=0; i < this.offenses.length; i++) {
+                    output += "offense=" + this.offenses[i];
+                    if (i < this.offenses.length - 1) {
+                        output += join;
+                    }
+                }
+            }
+            this.query_url = output;
+            window.location = this.query_url;
+        },
+    }
+
+    var state_form = $("#state-form");
+    state_form.submit(function(e){
+        e.preventDefault();
+        search_query.get_state();
+        show_next($(this).parent().attr("next"));
+    });
+
+    var felony_bool = $("#felony button");
+    felony_bool.click(function(){
+        var item = $(this);
+        felony_bool.addClass("info");
+        item.removeClass("info");
+        search_query.felony = eval(item[0].value);
+        show_next($(this).parent().parent().attr("next"));
+    });
+
+    var misdem_bool = $("#misdem button");
+    misdem_bool.click(function(){
+        var item = $(this);
+        misdem_bool.addClass("info");
+        item.removeClass("info");
+        search_query.misdemeanor = eval(item[0].value);
+    });
+
+    var offenses = $("#offenses button");
+    offenses.click(function(){
+        var item = $(this);
+        if (item.hasClass("secondary")) {
+            item.removeClass("secondary");
+        } else {
+            item.addClass("secondary");
+        }
+        show_next($(this).parent().attr("next"));
+        show_next("submission")
+    });
+
+    var citizenship = $("#citizenship button");
+    citizenship.click(function(){
+        var item = $(this);
+        citizenship.addClass("info");
+        item.removeClass("info");
+        search_query.citizenship = eval(item[0].value);
+        show_next($(this).parent().parent().attr("next"));
+    });
+
+    var benefits = $("#benefits button");
+    benefits.click(function(){
+        var item = $(this);
+        benefits.addClass("info");
+        item.removeClass("info");
+        search_query.benefits = eval(item[0].value);
+        show_next($(this).parent().parent().attr("next"));
+    });
+
+    var housing = $("#housing button");
+    housing.click(function(){
+        var item = $(this);
+        housing.addClass("info");
+        item.removeClass("info");
+        search_query.housing = eval(item[0].value);
+    });
+
+    var submit = $("#submit-request");
+    submit.click(function(){
+        search_query.get_offenses();
+        search_query.build_query();
+    });
+
+    function show_next(next_item){
+        if ($("#" + next_item).hasClass('hide')) {
+            $("#" + next_item).removeClass("hide")
+        }
+    }
+});
+</script>
+{% endblock %}

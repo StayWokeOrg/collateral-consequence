@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+{% load static %}
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Collateral Consequence</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.3/css/normalize.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.3/css/foundation.min.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="{% static 'custom.css' %}" />
+         
+    </head>
+    <body>
+        <nav class="top-bar" data-topbar>
+            <ul class="title-area">
+                <li class="name">
+                    <h1>
+                        <a href="{% url 'home' %}">
+                        Collateral Consequences
+                        </a>
+                    </h1>
+                </li>
+                <li class="toggle-topbar menu-icon">
+                    <a href="#">
+                        <span>menu</span>
+                    </a>
+                </li>
+            </ul>
+            <section class="top-bar-section">
+                <ul class="right">
+                    <li class="divider"></li>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li class="divider"></li>
+                    <li><a href="{% url 'crime_search' %}">Search</a></li>
+                    <li class="divider"></li>
+                </ul>
+            </section>
+        </nav>
+        {% block body %}
+        {% endblock %}
+        <footer class="row">
+            <div class="large-12 columns"><hr/>
+                <div class="row">
+                    <div class="large-6 columns">
+                        <p>&copy; Copyright StayWokeOrg 2017.</p>
+                    </div>
+                    <div class="large-6 columns">
+                        <ul class="inline-list right">
+                            <li><a href="#">Link 1</a></li>
+                            <li><a href="#">Link 2</a></li>
+                            <li><a href="#">Link 3</a></li>
+                            <li><a href="#">Link 4</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.3/js/foundation.min.js"></script>
+        <script>
+            $(document).foundation();
+        </script>
+        {% block javascript %}
+        {% endblock %}
+    </body>
+</html>

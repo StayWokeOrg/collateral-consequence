@@ -1,0 +1,207 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+    <div class="large-12 columns panel center">
+        <h1 class="center">Results</h1>
+    {{ count }} consequences were found. Click on the headings below to load them by category. Note that some consequences are in multiple categories.
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="domestic">Family/Domestic Rights <button>View</button></h2>
+        <div id="domestic-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="vehicle">Driver's Licenses <button>View</button></h2>
+        <div id="vehicle-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="professional">Work Licenses and Certifications <button>View</button></h2>
+        <div id="professional-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="benefits">Government Benefits <button>View</button></h2>
+        <div id="benefits-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="Housing">Housing <button>View</button></h2>
+        <div id="Housing-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="Employment">Employment <button>View</button></h2>
+        <div id="Employment-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="Registration">Registration, Notification, and Registry Restrictions <button>View</button></h2>
+        <div id="Registration-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="Education">Education <button>View</button></h2>
+        <div id="Education-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="contracting">Government Contracting and Program Participation <button>View</button></h2>
+        <div id="contracting-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="loans">Government Loans and Grants <button>View</button></h2>
+        <div id="loans-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="Recreational">Recreational and Weapons Licenses <button>View</button></h2>
+        <div id="Recreational-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="Business">Business License and Other Property Rights <button>View</button></h2>
+        <div id="Business-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="civic">Political and Civic Participation <button>View</button></h2>
+        <div id="civic-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+
+    <div class="large-12 columns panel">
+        <h2 class="center" id="Judicial">Judicial Rights <button>View</button></h2>
+        <div id="Judicial-content">
+            <h3>Mandatory/Automatic</h3>
+            <ul class="mandatory"></ul>
+            <h3>Background Check</h3>
+            <ul class="background"></ul>
+        </div>
+    </div>
+</div>
+
+    
+
+{% endblock %}
+
+{% load static %}
+{% block javascript %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        var targets = $("h2 button");
+        targets.click(function(){
+            $(this).css({"display": "none"});
+            var parent = $(this).parent(),
+                cat = $(parent).attr("id");
+            get_consequences(cat);
+        });
+
+        function get_consequences(category){
+            var fetch_me = "{% url 'api_consequences' query_params.state %}";
+            fetch_me += "?consequence_cat=" + category;
+            {% for offense in query_params.offense %}
+                fetch_me += "&offense={{ offense }}";
+            {% endfor %}
+            {% if query_params.felony %}
+                fetch_me += "&felony=True";
+            {% endif %}
+            {% if query_params.misdem %}
+                fetch_me += "&misdem=True";
+            {% endif %}
+            {% if query_params.citizen %}
+                fetch_me += "&citizen=True";
+            {% endif %}
+            {% if query_params.benefits %}
+                fetch_me += "&benefits=True";
+            {% endif %}
+            {% if query_params.housing %}
+                fetch_me += "&housing=True";
+            {% endif %}
+
+            $.get(fetch_me, function(data){
+                console.log(fetch_me);
+                // console.log(data);
+                var mandatory_list = $("#" + category + "-content ul.mandatory"),
+                    bkgd_list = $("#" + category + "-content ul.background");
+
+                for (var i=0; i < data.length; i++) {
+                    var item = "<li>" + data[i].title + "</li>";
+                    if (data[i].consequence_type[0] === "Mandatory/Automatic") {
+                        mandatory_list.append(item);
+                    } else {
+                        bkgd_list.append(item);   
+                    }
+
+                }
+            });
+        };
+    });
+</script>
+{% endblock %}

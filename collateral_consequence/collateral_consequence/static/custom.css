@@ -1,0 +1,21 @@
+* {
+    box-sizing: border-box;
+}
+
+.center {
+    text-align: center;
+}
+
+.button.white {
+    color: white;
+}
+.button.white h2 {
+    color: white;
+}
+.button:focus {
+    outline: none;
+}
+
+.hide {
+    display: none;
+}
