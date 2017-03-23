@@ -421,7 +421,7 @@ class SearchTests(TestCase):
         result_count = Consequence.objects.filter(
             complex_query, state="ny", duration__in=["perm", "spec"]
         ).exclude(consequence_type__contains="Discretion").count()
-        self.assertTrue(len(parsed_content) == result_count)
+        self.assertEqual(len(parsed_content), result_count)
 
     def test_get_mandatory_consequences_returns_right_count_consequences(self):
         """."""
