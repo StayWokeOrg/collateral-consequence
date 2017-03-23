@@ -416,7 +416,7 @@ class SearchTests(TestCase):
         })
         parsed_content = self.parsed_json_response(req)
         complex_query = self.complex_query([
-            "vehicle", "weapons", "Any Offense"
+            "vehicle", "Weapons", "Any Offense"
         ])
         result_count = Consequence.objects.filter(
             complex_query, state="ny", duration__in=["perm", "spec"]
@@ -679,7 +679,7 @@ class ResultsViewTests(TestCase):
             "results", kwargs={"state": "NY"}), {
             "offense": ["weapons"]
         })
-        qry = Q(offense_cat__contains="weapons")
+        qry = Q(offense_cat__contains="Weapons")
         qry |= Q(offense_cat__contains="Any offense")
         consqs_ct = Consequence.objects.filter(
             qry,
@@ -695,7 +695,7 @@ class ResultsViewTests(TestCase):
             "results", kwargs={"state": "NY"}), {
             "offense": ["weapons", "violence"]
         })
-        qry = Q(offense_cat__contains="weapons")
+        qry = Q(offense_cat__contains="Weapons")
         qry |= Q(offense_cat__contains="violence")
         qry |= Q(offense_cat__contains="Any offense")
         consqs_ct = Consequence.objects.filter(
@@ -727,7 +727,8 @@ class ResultsViewTests(TestCase):
             "results", kwargs={"state": "NY"}), {
             "offense": ["fluffiness", "weapons"]
         })
-        qry = Q(offense_cat__contains="weapons")
+
+        qry = Q(offense_cat__contains="Weapons")
         qry |= Q(offense_cat__contains="Any offense")
         consqs_ct = Consequence.objects.filter(
             qry,
